@@ -28,6 +28,9 @@ public class PlayerInput implements KeyInput {
                         return DOWN;
                     case ("A"):
                         return LEFT;
+                    // ==============================
+                    // UC3.1: Người chơi nhấn phím Space
+                    // ==============================
                     case ("SPACE"):
                         return PLACEBOMB;
                 }

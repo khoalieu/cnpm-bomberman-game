@@ -30,6 +30,9 @@ public class Flame extends AnimateEntity {
         updateDestroyAnimation();
     }
 
+    // ==============================
+    // UC3.9: Vụ nổ kết thúc, hệ thống dọn dẹp các đối tượng Bom và Tia lửa khỏi bộ nhớ
+    // ==============================
     @Override
     public void updateDestroyAnimation() {
         checkCollison();
@@ -41,18 +44,23 @@ public class Flame extends AnimateEntity {
         }
     }
 
+    // ==============================
+    // UC3.8: Hệ thống kiểm tra va chạm của tia lửa với các ô trên bản đồ
+    // ==============================
     public void interactWith(Entity entity) {
+        // ==============================
+        // UC3.8a.1. Nếu chạm Tường mềm (Brick): Hệ thống phá gạch, chặn tia lửa.
+        // ==============================
+        // (Lưu ý: Logic "chặn tia lửa" đã được xử lý bằng cờ false trong vòng lặp class Bomb. Tại đây chỉ xử lý "phá hủy gạch")
         if (entity instanceof Brick) {
             ((Brick) entity).destroyed = true;
         } else if (entity instanceof Item) {
             entity.setBlock(false);
             if (entity instanceof SpeedItem) {
                 entity.setSprite(Sprite.powerup_speed);
-            }
-            if (entity instanceof BombItem) {
+            } else if (entity instanceof BombItem) {
                 entity.setSprite(Sprite.powerup_bombs);
-            }
-            if (entity instanceof FlameItem) {
+            } else if (entity instanceof FlameItem) {
                 entity.setSprite(Sprite.powerup_flames);
             }
         } else if (entity instanceof Portal) {
@@ -62,11 +70,17 @@ public class Flame extends AnimateEntity {
     }
 
     public void checkCollison() {
+        // ==============================
+        // UC3.8a.2. Nếu chạm Quái vật (Enemy): Hệ thống tiêu diệt quái vật.
+        // ==============================
         map.getEnemies().forEach(enemy -> {
             if (this.isCollider(enemy)) {
                 enemy.destroy();
             }
         });
+        // ==============================
+        // UC3.8a.3. Nếu chạm Người chơi (Player): Hệ thống trừ mạng người chơi
+        // ==============================
         if (this.isCollider(map.getPlayer()) && map.getPlayer().getImmortal() == 0 && !map.getPlayer().isDestroyed()) {
             map.getPlayer().destroy();
         }
