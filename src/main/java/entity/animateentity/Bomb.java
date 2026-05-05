@@ -25,142 +25,162 @@ public class Bomb extends AnimateEntity {
 
     @Override
     public void update() {
+        // ==============================
+        // UC3.5: Đếm ngược thời gian nổ của bom
+        // ==============================
         if (timetoExplode != 0) {
             updateAnimation();
             timetoExplode--;
         } else {
-            delete();
+            // ==============================
+            // UC3.6: Hết thời gian đếm ngược, kích hoạt trạng thái "Nổ" (Explode)
+            // ==============================
+            delete(); // Dọn dẹp đối tượng Bom hiện tại
             Flame flm = FlameTexture.setFlame("be", this.tileX, this.tileY);
             map.getFlames().add(flm);
+
+            // ==============================
+            // UC3.7: Tính toán và vẽ các tia lửa (Flame) lan ra 4 hướng
+            // ==============================
             for (int i = 1; i <= flm.flameLength; i++) {
                 int x = flm.getTileX();
                 int y = flm.getTileY();
-                int ii = i;
+
+                // Kiểm tra và tương tác luồng HƯỚNG XUỐNG
                 if (down) {
-                    map.getBombs().forEach(bomb -> {
-                        if (bomb.getTileX() == x && bomb.getTileY() == (y + ii)) {
-                            bomb.setTimetoExplode(0);
-                            down = false;
-                            if(bomb.up) {
-                                cnt++;
-                            }
-                        }
-                    });
-                    map.getFlames().forEach(flame -> {
-                        if (flame.getTileX() == x && flame.getTileY() == (y+ii)) {
-                            down = false;
-                        }
-                    });
-                    if (map.getTile(x, y + i) instanceof Grass == false) {
-                        flm.interactWith(map.getTile(x, y + i));
-                        down = false;
-                    }
+                    triggerChainBomb(x, y + i, "down");
+                    checkFlameOverlap(x, y + i, "down");
+                    // ==============================
+                    //UC3.7a.1: Nếu ô tiếp theo chứa vật cản (Wall/Brick), gọi hàm tương tác và ngừng lan truyền
+                    // ==============================
+                    checkWallCollision(x, y + i, "down", flm);
                 }
-
+                // Kiểm tra và tương tác luồng HƯỚNG LÊN
                 if (up) {
-                    map.getBombs().forEach(bomb -> {
-                        if (bomb.getTileX() == x && bomb.getTileY() == (y - ii)) {
-                            bomb.setTimetoExplode(0);
-                            up = false;
-                            if(bomb.down) {
-                                cnt++;
-                            }
-                        }
-                    });
-                    map.getFlames().forEach(flame -> {
-                        if (flame.getTileX() == x && flame.getTileY() == (y-ii)) {
-                            up = false;
-                        }
-                    });
-                    if (map.getTile(x, y - i) instanceof Grass == false) {
-                        flm.interactWith(map.getTile(x, y - i));
-                        up = false;
-                    }
+                    triggerChainBomb(x, y - i, "up");
+                    checkFlameOverlap(x, y - i, "up");
+                    // ==============================
+                    //UC3.7a.1: Nếu ô tiếp theo chứa vật cản (Wall/Brick), gọi hàm tương tác và ngừng lan truyền
+                    // ==============================
+                    checkWallCollision(x, y - i, "up", flm);
                 }
-
+                // Kiểm tra và tương tác luồng HƯỚNG PHẢI
                 if (right) {
-                    map.getBombs().forEach(bomb -> {
-                        if (bomb.getTileX() == (x + ii) && bomb.getTileY() == (y)) {
-                            bomb.setTimetoExplode(0);
-                            right = false;
-                            if(bomb.left) {
-                                cnt++;
-                            }
-                        }
-                    });
-                    map.getFlames().forEach(flame -> {
-                        if (flame.getTileX() == (x+ii) && flame.getTileY() == (y)) {
-                            right = false;
-                        }
-                    });
-                    if (map.getTile(x + i, y) instanceof Grass == false) {
-                        flm.interactWith(map.getTile(x + i, y));
-                        right = false;
-
-                    }
+                    triggerChainBomb(x + i, y, "right");
+                    checkFlameOverlap(x + i, y, "right");
+                    // ==============================
+                    //UC3.7a.1: Nếu ô tiếp theo chứa vật cản (Wall/Brick), gọi hàm tương tác và ngừng lan truyền
+                    // ==============================
+                    checkWallCollision(x + i, y, "right", flm);
                 }
+                // Kiểm tra và tương tác luồng HƯỚNG TRÁI
                 if (left) {
-                    map.getBombs().forEach(bomb -> {
-                        if (bomb.getTileX() == (x - ii) && bomb.getTileY() == (y)) {
-                            bomb.setTimetoExplode(0);
-                            left = false;
-                            if(bomb.right) {
-                                cnt++;
-                            }
-                        }
-                    });
-                    map.getFlames().forEach(flame -> {
-                        if (flame.getTileX() == (x-ii) && flame.getTileY() == (y)) {
-                            left = false;
-                        }
-                    });
-                    if (map.getTile(x - i, y) instanceof Grass == false) {
-                        flm.interactWith(map.getTile(x - i, y));
-                        left = false;
-                    }
+                    triggerChainBomb(x - i, y, "left");
+                    checkFlameOverlap(x - i, y, "left");
+                    // ==============================
+                    //UC3.7a.1: Nếu ô tiếp theo chứa vật cản (Wall/Brick), gọi hàm tương tác và ngừng lan truyền
+                    // ==============================
+                    checkWallCollision(x - i, y, "left", flm);
                 }
 
-                if (i == flm.flameLength) {
-                    if (down) {
-                        Flame vdl = FlameTexture.setFlame("vdl", x, y + i);
-                        map.getFlames().add(vdl);
-                    }
-                    if (up) {
-                        Flame vtl = FlameTexture.setFlame("vtl", x, y - i);
-                        map.getFlames().add(vtl);
-                    }
-                    if (left) {
-                        Flame hll = FlameTexture.setFlame("hll", x - i, y);
-                        map.getFlames().add(hll);
-                    }
-                    if (right) {
-                        Flame hrl = FlameTexture.setFlame("hrl", x + i, y);
-                        map.getFlames().add(hrl);
-                    }
-
-                } else {
-                    if (down) {
-                        Flame vd = FlameTexture.setFlame("v", x, y + i);
-                        map.getFlames().add(vd);
-                    }
-                    if (up) {
-                        Flame vt = FlameTexture.setFlame("v", x, y - i);
-                        map.getFlames().add(vt);
-                    }
-                    if (left) {
-                        Flame hl = FlameTexture.setFlame("h", x - i, y);
-                        map.getFlames().add(hl);
-                    }
-                    if (right) {
-                        Flame hr = FlameTexture.setFlame("h", x + i, y);
-                        map.getFlames().add(hr);
-                    }
-                }
+                // ==============================
+                // UC3.7. (Tiếp): Nếu ô tiếp theo là đường đi trống (Grass), hệ thống tiếp tục sinh tia lửa
+                // ==============================
+                // Chỉ vẽ khi cờ tương ứng vẫn bằng true
+                if (down) spawnFlame(x, y + i, i, flm.flameLength, "down");
+                if (up) spawnFlame(x, y - i, i, flm.flameLength, "up");
+                if (right) spawnFlame(x + i, y, i, flm.flameLength, "right");
+                if (left) spawnFlame(x - i, y, i, flm.flameLength, "left");
             }
-            if(cnt == 0) {
+
+            if (cnt == 0) {
                 Sound.bomb_explosion.play();
             }
         }
+    }
+
+    // ================= CÁC HÀM HỖ TRỢ ĐÃ ĐƯỢC TÁCH (EXTRACT METHODS) =================
+    /**
+     * Kiểm tra và kích nổ các bom khác (Nổ dây chuyền)
+     */
+    private void triggerChainBomb(int x, int y, String dir) {
+        map.getBombs().forEach(bomb -> {
+            if (bomb.getTileX() == x && bomb.getTileY() == y) {
+                // ==============================
+                // UC3.8a.4 - Ép quả bom khác đếm ngược về 0 ngay lập tức
+                // ==============================
+                bomb.setTimetoExplode(0);
+                // Cập nhật trạng thái tia lửa và biến đếm âm thanh
+                switch (dir) {
+                    case "down" -> {
+                        down = false;
+                        if (bomb.up) cnt++;
+                    }
+                    case "up" -> {
+                        up = false;
+                        if (bomb.down) cnt++;
+                    }
+                    case "right" -> {
+                        right = false;
+                        if (bomb.left) cnt++;
+                    }
+                    case "left" -> {
+                        left = false;
+                        if (bomb.right) cnt++;
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Tránh vẽ đè tia lửa nếu tại ô đó đã có tia lửa rồi
+     */
+    private void checkFlameOverlap(int x, int y, String dir) {
+        map.getFlames().forEach(flame -> {
+            if (flame.getTileX() == x && flame.getTileY() == y) {
+                switch (dir) {
+                    case "down" -> down = false;
+                    case "up" -> up = false;
+                    case "right" -> right = false;
+                    case "left" -> left = false;
+                }
+            }
+        });
+    }
+
+    /**
+     * UC3.7a.1: Nếu ô tiếp theo chứa vật cản (Wall/Brick), gọi hàm tương tác và ngừng lan truyền
+     */
+    private void checkWallCollision(int x, int y, String dir, Flame centerFlame) {
+        if (!(map.getTile(x, y) instanceof Grass)) {
+            centerFlame.interactWith(map.getTile(x, y));
+            switch (dir) {
+                case "down" -> down = false;
+                case "up" -> up = false;
+                case "right" -> right = false;
+                case "left" -> left = false;
+            }
+        }
+    }
+
+    /**
+     * Sinh hình ảnh tia lửa dựa vào hướng và vị trí lan truyền
+     */
+    private void spawnFlame(int x, int y, int i, int max, String dir) {
+        String tex = "";
+        if (i == max) {
+            tex = switch (dir) {
+                case "down" -> "vdl";
+                case "up" -> "vtl";
+                case "left" -> "hll";
+                case "right" -> "hrl";
+                default -> "";
+            };
+        } else {
+            tex = (dir.equals("up") || dir.equals("down")) ? "v" : "h";
+        }
+        map.getFlames().add(FlameTexture.setFlame(tex, x, y));
     }
 
     public int getLimit() {
@@ -168,7 +188,7 @@ public class Bomb extends AnimateEntity {
     }
 
     public void setLimit(int limit) {
-        this.limit = limit;
+        Bomb.limit = limit;
     }
 
     public void setTimetoExplode(int timetoExplode) {
@@ -179,5 +199,4 @@ public class Bomb extends AnimateEntity {
     public void delete() {
         this.remove();
     }
-
 }

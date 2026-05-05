@@ -10,23 +10,15 @@ import sound.Sound;
 import texture.BombTexture;
 
 import static graphics.Sprite.*;
-
 import static variables.Variables.DIRECTION.*;
 
 public class Bomber extends Character {
     public KeyInput keyInput;
-    public boolean canPlace = true;
-
     private int timeRevival;
 
     public Bomber(int x, int y, Sprite sprite, KeyInput keyInput) {
         super(x, y, sprite);
-        animation.put(LEFT, Sprite.PLAYER_LEFT);
-        animation.put(RIGHT, Sprite.PLAYER_RIGHT);
-        animation.put(UP, Sprite.PLAYER_UP);
-        animation.put(DOWN, Sprite.PLAYER_DOWN);
-        animation.put(DESTROYED, Sprite.PLAYER_DESTROYED);
-        currentAnimate = animation.get(DOWN);
+        initAnimation();
         this.keyInput = keyInput;
         this.keyInput.initialization();
         this.defaultVel = 1;
@@ -34,108 +26,167 @@ public class Bomber extends Character {
         this.life = 3;
     }
 
+    private void initAnimation() {
+        animation.put(LEFT, Sprite.PLAYER_LEFT);
+        animation.put(RIGHT, Sprite.PLAYER_RIGHT);
+        animation.put(UP, Sprite.PLAYER_UP);
+        animation.put(DOWN, Sprite.PLAYER_DOWN);
+        animation.put(DESTROYED, Sprite.PLAYER_DESTROYED);
+        currentAnimate = animation.get(DOWN);
+    }
+
     public void placeBombAt(int x, int y) {
-        canPlace = true;
-        int bombX = 0;
-        int bombY = 0;
-        if (x % SCALED_SIZE < y % SCALED_SIZE) {
-            bombX = x / SCALED_SIZE;
-            if (y % SCALED_SIZE > SCALED_SIZE / 2) {
-                bombY = y / SCALED_SIZE + 1;
-            } else {
-                bombY = y / SCALED_SIZE;
-            }
-        } else {
-            bombY = y / SCALED_SIZE;
-            if (x % SCALED_SIZE > SCALED_SIZE / 2) {
-                bombX = x / SCALED_SIZE + 1;
-            } else {
-                bombX = x / SCALED_SIZE;
+        // Giải mã tọa độ pixel sang tọa độ lưới (Grid)
+        int bombX = Math.round((float) x / SCALED_SIZE);
+        int bombY = Math.round((float) y / SCALED_SIZE);
+
+        // ==============================
+        // UC3.3: Kiểm tra số lượng bom tối đa
+        // ==============================
+
+        // ==============================
+        // UC3.3a.1: Nếu số lượng bom người chơi đã đặt trên bản đồ đạt ngưỡng tối đa
+        // ==============================
+        if (!isBombLimitAvailable()) {
+            return; // UC3.3a.2: Hệ thống bỏ qua lệnh
+        }
+
+        // ==============================
+        // UC3.4a.1: Kiểm tra vị trí hợp lệ (Vật cản, Bom khác, Enemy)
+        // ==============================
+        if (!isValidPlaceToSetBomb(bombX, bombY)) {
+            // UC3.4a.2: Hệ thống không cho phép đặt đè
+            return;
+        }
+
+        // ==============================
+        // UC3.4: Khởi tạo và kích hoạt bom
+        // ==============================
+        executePlaceBomb(bombX, bombY);
+    }
+
+    private boolean isBombLimitAvailable() {
+        return map.getBombs().size() < Bomb.limit;
+    }
+
+    private boolean isValidPlaceToSetBomb(int bx, int by) {
+        // Kiểm tra nền phải là cỏ
+        if (!(map.getTile(bx, by) instanceof Grass)) return false;
+
+        // Kiểm tra xem đã có quả bom nào ở tọa độ này chưa
+        boolean hasBomb = map.getBombs().stream()
+                .anyMatch(b -> b.getTileX() == bx && b.getTileY() == by);
+
+        // Kiểm tra xem có quái vật đang đứng đây không
+        boolean hasEnemy = map.getEnemies().stream()
+                .anyMatch(e -> e.getTileX() == bx && e.getTileY() == by);
+
+        return !hasBomb && !hasEnemy;
+    }
+
+    private void executePlaceBomb(int bx, int by) {
+        Bomb bomb = BombTexture.setBomb(bx, by);
+        map.getBombs().add(bomb);
+        Sound.place_bomb.play();
+    }
+
+    // --- HỆ THỐNG DI CHUYỂN & VA CHẠM ---
+
+    @Override
+    public void setDirection() {
+        // ==============================
+        //UC3.2: Hệ thống nhận lệnh và giải mã
+        // ==============================
+        direction = keyInput.handleKeyInput();
+        this.setVelocity(0, 0);
+
+        switch (direction) {
+            case LEFT -> this.setVelocity(-defaultVel, 0);
+            case RIGHT -> this.setVelocity(defaultVel, 0);
+            case UP -> this.setVelocity(0, -defaultVel);
+            case DOWN -> this.setVelocity(0, defaultVel);
+            // ==============================
+            //UC3.2 (tiếp): Kich hoạt bom
+            // ==============================
+            case PLACEBOMB -> {
+                placeBombAt(pixelX, pixelY);
+                direction = NONE; // Tránh việc đặt bom liên tục khi giữ phím
             }
         }
-        for (Bomb bomb: map.getBombs()) {
-            if (bomb.getTileX() == bombX && bomb.getTileY() == bombY) {
-                canPlace = false;
-            }
-        }
-        for (Enemy enemy: map.getEnemies()) {
-            if(enemy.getTileX() == bombX && enemy.getTileY() == bombY) {
-                canPlace = false;
-            }
-        }
-        if (map.getTile(bombX, bombY) instanceof Grass && map.getBombs().size() < Bomb.limit && canPlace) {
-            Bomb bomb = BombTexture.setBomb(bombX, bombY);
-            map.getBombs().add(bomb);
-            Sound.place_bomb.play();
+
+        if (direction != NONE) {
+            currentAnimate = animation.get(direction);
+            updateAnimation();
+            Sound.walk.play();
         }
     }
 
     @Override
     public void checkCollision() {
         super.checkCollision();
-        if (immortal > 0) {
-            immortal--;
+        handleImmortalState();
+        handleEnemyCollision();
+        handleItemCollision();
+        handleBombBlocking();
+
+        // Tối ưu hóa việc bo góc khi di chuyển
+        if (isCollision) {
+            slidingSensivity();
         }
+
+        tileX = pixelX / SCALED_SIZE;
+        tileY = pixelY / SCALED_SIZE;
+    }
+
+    private void handleImmortalState() {
+        if (immortal > 0) immortal--;
+    }
+
+    private void handleEnemyCollision() {
         map.getEnemies().forEach(enemy -> {
-            if (this.isCollider(enemy)) {
-                if (immortal == 0) {
-                    destroy();
-                }
+            if (this.isCollider(enemy) && immortal == 0) {
+                destroy();
             }
         });
-        map.getBombs().forEach(bomb -> {
-            if (!this.isCollider(bomb)) {
-                bomb.setBlock(true);
-            }
-        });
+    }
+
+    private void handleItemCollision() {
         map.getItems().forEach(item -> {
             if (this.isCollider(item)) {
                 Sound.get_item.play();
                 item.setActivated(true);
+
+                // Dòng này rất quan trọng để engine gỡ item khỏi bản đồ và tính điểm!
                 item.remove();
+
                 if (item instanceof SpeedItem) {
                     setSpeed(SpeedItem.increasedSpeed);
                 }
                 item.delete();
             }
         });
-        if (isCollision) {
-            for (int i = -8 - speed; i <= 8 + speed; i++) {
-                switch (direction) {
-                    case UP, DOWN -> pixelX += i;
-                    case LEFT, RIGHT -> pixelY += i;
-                }
-                super.checkCollision();
-                if (!isCollision) {
-                    break;
-                }
-                switch (direction) {
-                    case UP, DOWN -> pixelX -= i;
-                    case LEFT, RIGHT -> pixelY -= i;
-                }
-            }
-        }
-        tileX = pixelX / SCALED_SIZE;
-        tileY = pixelY / SCALED_SIZE;
     }
 
+    private void handleBombBlocking() {
+        map.getBombs().forEach(bomb -> {
+            if (!this.isCollider(bomb)) {
+                bomb.setBlock(true);
+            }
+        });
+    }
 
-    @Override
-    public void setDirection() {
-        direction = keyInput.handleKeyInput();
-        this.setVelocity(0, 0);
-        switch (direction) {
-            case NONE -> this.setVelocity(0, 0);
-            case LEFT -> this.setVelocity(-defaultVel, 0);
-            case RIGHT -> this.setVelocity(defaultVel, 0);
-            case UP -> this.setVelocity(0, -defaultVel);
-            case DOWN -> this.setVelocity(0, defaultVel);
-            case PLACEBOMB -> placeBombAt(pixelX, pixelY);
-        }
-        if (direction != NONE && direction != PLACEBOMB) {
-            currentAnimate = animation.get(direction);
-            updateAnimation();
-            Sound.walk.play();
+    private void slidingSensivity() {
+        for (int i = -8 - speed; i <= 8 + speed; i++) {
+            switch (direction) {
+                case UP, DOWN -> pixelX += i;
+                case LEFT, RIGHT -> pixelY += i;
+            }
+            super.checkCollision();
+            if (!isCollision) break;
+            switch (direction) {
+                case UP, DOWN -> pixelX -= i;
+                case LEFT, RIGHT -> pixelY -= i;
+            }
         }
     }
 
@@ -152,7 +203,5 @@ public class Bomber extends Character {
         Sound.bomber_die.play();
     }
 
-    public int getTimeRevival() {
-        return timeRevival;
-    }
+    public int getTimeRevival() { return timeRevival; }
 }
