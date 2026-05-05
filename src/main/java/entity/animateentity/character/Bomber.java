@@ -95,12 +95,15 @@ public class Bomber extends Character {
     @Override
     public void setDirection() {
         // ==============================
-        //UC3.2: Hệ thống nhận lệnh và giải mã
+        //UC2.2 - UC3.2: Gán hướng đã giải mã vào thuộc tính direction của nhân vật
         // ==============================
         direction = keyInput.handleKeyInput();
         this.setVelocity(0, 0);
 
         switch (direction) {
+            // =============================================================
+            // UC2.3: Hệ thống thiết lập vận tốc (Velocity) dựa trên hướng
+            // =============================================================
             case LEFT -> this.setVelocity(-defaultVel, 0);
             case RIGHT -> this.setVelocity(defaultVel, 0);
             case UP -> this.setVelocity(0, -defaultVel);
@@ -115,25 +118,36 @@ public class Bomber extends Character {
         }
 
         if (direction != NONE) {
+            // =============================================================
+            // UC2.3 (tiếp): Cập nhật hoạt ảnh (Animation) tương ứng với hướng đi
+            // =============================================================
             currentAnimate = animation.get(direction);
             updateAnimation();
+            // =============================================================
+            // UC2.6: Hệ thống phát âm thanh bước chân khi di chuyển
+            // =============================================================
             Sound.walk.play();
         }
     }
 
     @Override
     public void checkCollision() {
+        // =============================================================
+        // UC2.4: Hệ thống thực hiện kiểm tra va chạm tại tọa độ dự kiến
+        // =============================================================
         super.checkCollision();
         handleImmortalState();
         handleEnemyCollision();
         handleItemCollision();
         handleBombBlocking();
 
-        // Tối ưu hóa việc bo góc khi di chuyển
         if (isCollision) {
             slidingSensivity();
         }
 
+        // =============================================================
+        // UC2.5: Cập nhật tọa độ mới (Pixel và Grid) sau khi đã xử lý va chạm/trượt
+        // =============================================================
         tileX = pixelX / SCALED_SIZE;
         tileY = pixelY / SCALED_SIZE;
     }
@@ -176,6 +190,7 @@ public class Bomber extends Character {
     }
 
     private void slidingSensivity() {
+        // Chi tiết logic của UC2.4a.2: "Nắn" tọa độ nhân vật để lướt qua vật cản
         for (int i = -8 - speed; i <= 8 + speed; i++) {
             switch (direction) {
                 case UP, DOWN -> pixelX += i;
