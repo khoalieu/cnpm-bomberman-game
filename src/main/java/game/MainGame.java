@@ -93,23 +93,41 @@ public class MainGame extends Application {
                         countdown--;
                         menu.renderMessage('s', gameMenuContext);
                     }
+                    // ==============================
+                    // UC1.1: Người chơi chọn bắt đầu trò chơi mới từ Menu
+                    // ==============================
                     if (countdown == 0) {
                         countdown = 160;
                         backToMenu = false;
                         choseStart = true;
+                        // ==============================
+                        // UC1.8: Bắt đầu kích hoạt hệ thống âm thanh (SoundPlay)
+                        // ==============================
                         Sound.stage_sound.play();
                         Sound.stage_sound.loop();
+                        // Chuyển đổi giao diện sang màn hình chơi game (PLAY state)
                         stage.setScene(scene);
+                        // ==============================
+                        // UC1.2a.1: Hệ thống phát hiện lỗi thông qua cấu trúc xử lý ngoại lệ (try-catch) trong mã nguồn Java
+                        // ==============================
                         try {
                             map.createMap(MAP_URLS[0]);
                             map.resetNumber();
                         } catch (FileNotFoundException e) {
+                            // ==============================
+                            // UC1.2a.2: Hệ thống thực hiện ghi nhật ký (log) chi tiết lỗi ra bảng điều khiển (console)
+                            // UC1.2a.3: (Trong code hiện tại) Cần bổ sung logic trả về Menu hoặc thông báo trực quan.
+                            // UC1.2a.4: Kết thúc Use Case trong trạng thái thất bại.
+                            // ==============================
                             System.out.println(e);
                         }
                     }
                 } else {
                     if (now - lastFrame >= timePerFrame) {
                         lastFrame = now;
+                        // ==============================
+                        // UC1.6: Render toàn bộ bản đồ và đối tượng lên cửa sổ hiển thị
+                        // ==============================
                         map.updateMap();
                         map.renderMap(graphicsContext);
                         map.renderTopInfo(topInfoContext);

@@ -66,6 +66,9 @@ public class Map {
         player.setSpeed(2);
         time = 60*200;
     }
+    // ==============================
+    // UC1.2: Xác định tệp cấu hình của màn chơi tương ứng
+    // ==============================
     public void createMap(String mapPath) throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(mapPath));
         topInfoImage = new Image("/top_info.png");
@@ -73,11 +76,20 @@ public class Map {
         levelNumber = _string.charAt(0) - '0';
         resetEntities();
         revival = false;
+        // ==============================
+        // UC1.3: Duyệt qua từng ký tự trong ma trận tệp text
+        // ==============================
         for (int i = 0; i < HEIGHT; i++) {
             String string = scanner.nextLine();
             for (int j = 0; j < WIDTH; j++) {
                 char c = string.charAt(j);
+                // ==============================
+                // UC1.4: Phân tích ký tự để khởi tạo thực thể tương ứng
+                // ==============================
                 tiles[i][j] = StaticTexture.setStatic(c, i, j);
+                // ==============================
+                // UC1.5: Lưu tất cả các đối tượng vừa tạo vào danh sách quản lý đồ họa
+                // ==============================
                 if (tiles[i][j] instanceof Item) {
                     items.add((Item) tiles[i][j]);
                 }
