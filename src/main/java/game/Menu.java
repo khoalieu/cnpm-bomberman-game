@@ -59,6 +59,9 @@ public class Menu {
         if (direction == DOWN) {
             state = 0;
         }
+        // ==============================
+        // UC1.1: Người chơi chọn bắt đầu trò chơi mới từ giao diện Menu
+        // ==============================
         if (direction == DESTROYED && state == 1) {
             start = true;
             Sound.menu_sound.stop();

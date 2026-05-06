@@ -7,6 +7,9 @@ import graphics.Sprite;
 import input.PlayerInput;
 
 public class CharacterTexture {
+    // ==============================
+    // UC1.4: Phân tích ký tự để khởi tạo thực thể tương ứng (Nhân vật / Quái vật)
+    // ==============================
     public static Character setCharacter(char c, int i, int j) {
         switch (c) {
             case 'p':
