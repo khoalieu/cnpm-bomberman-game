@@ -5,7 +5,7 @@ import entity.animateentity.character.Bomber;
 import entity.animateentity.character.Character;
 import entity.animateentity.character.enemy.*;
 import entity.animateentity.Flame;
-import entity.Entity;;
+import entity.Entity;
 import entity.staticentity.Item;
 import entity.staticentity.Score;
 import game.MainGame;
@@ -108,7 +108,9 @@ public class Map {
             }
         }
     }
-
+    // =====================================
+    // UC5.8 - Hệ thống dọn dẹp dữ liệu màn hiện tại
+    // =====================================
     private void removeEntities() {
         ArrayList<Enemy> removedEnemies = new ArrayList<>();
         ArrayList<Bomb> removedBombs = new ArrayList<>();
