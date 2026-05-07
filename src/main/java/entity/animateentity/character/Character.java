@@ -8,6 +8,7 @@ import entity.staticentity.Portal;
 import entity.staticentity.Wall;
 import game.MainGame;
 import graphics.Sprite;
+import variables.Variables.DIRECTION;
 
 import static variables.Variables.*;
 
@@ -84,6 +85,13 @@ public abstract class Character extends AnimateEntity {
                 if (entity.isBlock() && this.isCollider(entity)) {
                     isCollision = true;
                 }
+                // =====================================
+                // UC5.6 - Bomber đi vào Portal đã được kích hoạt("entity instanceof Portal")
+                // =====================================
+
+                // =====================================
+                // UC5.7 - Hệ thống xác nhận điều kiện chuyển màn hợp lệ("((Portal) entity).isAccessAble()")
+                // =====================================
                 if (this instanceof Bomber && this.isCollider(entity) && entity instanceof Portal && ((Portal) entity).isAccessAble() && entity.getTileX() == j && entity.getTileY() == i) {
                     MainGame.setBackToMenu(true);
                     MainGame.setWin(true);
@@ -109,6 +117,9 @@ public abstract class Character extends AnimateEntity {
     }
 
     @Override
+    // =====================================
+    // UC5.3 - Hệ thống kiểm tra trạng thái của Bomber
+    // =====================================
     public void update() {
         if (isDestroyed()) {
             updateDestroyAnimation();

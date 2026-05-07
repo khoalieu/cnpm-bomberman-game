@@ -155,10 +155,12 @@ public class Bomber extends Character {
     private void handleImmortalState() {
         if (immortal > 0) immortal--;
     }
-
     private void handleEnemyCollision() {
         map.getEnemies().forEach(enemy -> {
             if (this.isCollider(enemy) && immortal == 0) {
+        //================================
+        // UC5.3a - Hệ thống phát hiện Bomber bị tiêu diệt
+        //================================
                 destroy();
             }
         });

@@ -111,6 +111,9 @@ public class MainGame extends Application {
                         // UC1.2a.1: Hệ thống phát hiện lỗi thông qua cấu trúc xử lý ngoại lệ (try-catch) trong mã nguồn Java
                         // ==============================
                         try {
+                            // ==============================
+                            // UC5.9 - Hệ thống tải màn chơi tiếp theo
+                            // ==============================
                             map.createMap(MAP_URLS[0]);
                             map.resetNumber();
                         } catch (FileNotFoundException e) {
@@ -123,6 +126,9 @@ public class MainGame extends Application {
                         }
                     }
                 } else {
+                        // ==============================
+                        // UC5.1 - Hệ thống cập nhật thời gian chơi
+                        // ==============================
                     if (now - lastFrame >= timePerFrame) {
                         lastFrame = now;
                         // ==============================
@@ -157,6 +163,12 @@ public class MainGame extends Application {
                             menu.renderMessage('c', gameMenuContext);
                             countdown--;
                         }
+                        // ==============================
+                        // UC5.1a - Hết thời gian chơi
+                            //UC5.1a.1	Bộ đếm thời gian giảm về 0.
+                            //UC5.1a.2	Hệ thống chuyển trạng thái trò chơi sang Game Over.
+                            //UC5.1a.3	Hệ thống hiển thị thông báo Game Over.
+                        // ==============================
                         if (countdown == 0) {
                             countdown = 160;
                             choseStart = false;
@@ -184,8 +196,9 @@ public class MainGame extends Application {
     public static void main(String[] args) {
         launch();
     }
-
-
+    // ==============================
+    // UC5.2 - Hệ thống cập nhật điểm số khi tiêu diệt quái vật
+    // ==============================
     public static void setNewScore(int enemy_score) {
         MainGame.score = score + enemy_score;
     }
