@@ -28,7 +28,9 @@ public abstract class Entity {
         this.pixelX = x * SCALED_SIZE;
         this.pixelY = y * SCALED_SIZE;
         this.sprite = sprite;
-        this.image = sprite.getFxImage();
+        if (sprite != null) {
+            this.image = sprite.getFxImage();
+        }
         this.block = false;
         this.removed = false;
     }
