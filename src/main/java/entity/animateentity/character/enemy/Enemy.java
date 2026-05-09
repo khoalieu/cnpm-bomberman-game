@@ -7,11 +7,16 @@ import map.Map;
 
 import static variables.Variables.*;
 
+/**
+ * Lớp trừu tượng định nghĩa các đặc tính chung cho kẻ địch (Enemy)
+ */
 public abstract class Enemy extends Character {
+
     protected int cntMove;
     protected int changeSpeed;
     protected int defaultCntMove;
     protected int defaultChangeSpeed;
+
     public Enemy(int x, int y, Sprite sprite) {
         super(x, y, sprite);
     }
@@ -21,6 +26,7 @@ public abstract class Enemy extends Character {
     }
 
     public int getCntMove() {
+
         return this.cntMove;
     }
 
@@ -29,10 +35,20 @@ public abstract class Enemy extends Character {
     }
 
     public void setChangeSpeed(int changeSpeed) {
+
         this.changeSpeed = changeSpeed;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI & Movement Logic
+    |--------------------------------------------------------------------------
+     */
+
+    // Xác định hướng di chuyển thông qua thuật toán AI của từng loại quái
     public abstract DIRECTION path(Map map, Bomber player, Enemy enemy);
+
+    // Cập nhật vận tốc và hoạt ảnh dựa trên hướng đi do AI quyết định
     public void setDirection() {
         direction = path(map, map.getPlayer(), this);
         switch (direction) {

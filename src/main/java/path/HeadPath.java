@@ -9,16 +9,26 @@ import variables.Variables.DIRECTION;
 import static graphics.Sprite.SCALED_SIZE;
 import static variables.Variables.DIRECTION.*;
 
+/**
+ * Thuật toán HeadPath: Kẻ địch tấn công khi phát hiện người chơi nằm trên cùng một hàng hoặc cột (tầm nhìn thẳng)
+ */
 public class HeadPath extends Path{
     public HeadPath(Map map, Bomber player, Enemy enemy) {
         super(map, player, enemy);
     }
-
+    /*
+    |--------------------------------------------------------------------------
+    | AI Logic
+    |--------------------------------------------------------------------------
+     */
     @Override
     public DIRECTION path() {
+        // Nếu không cùng hàng hoặc cùng cột, không kích hoạt trạng thái đuổi theo trực diện
         if (player.getTileX() != enemy.getTileX() && player.getTileY() != enemy.getTileY()) {
             return NONE;
         }
+
+        // Trường hợp: Người chơi và kẻ địch nằm trên cùng một Cột (X)
         if (player.getTileX() == enemy.getTileX()) {
             if (enemy.getPixelX() % SCALED_SIZE != 0) {
                 return NONE;
@@ -32,6 +42,8 @@ public class HeadPath extends Path{
             if (!check) {
                 return NONE;
             }
+
+            // Kiểm tra vật cản (Bom và Block) ở khoảng giữa hai thực thể theo trục dọc
             if (player.getTileY() < enemy.getTileY()) {
                 for (Bomb bomb: map.getBombs()) {
                     if (bomb.getTileY() >= player.getTileY() && bomb.getTileY() <= enemy.getTileY()) {
@@ -55,7 +67,9 @@ public class HeadPath extends Path{
                     }
                 }
             }
-        } else {
+        }
+        // Trường hợp: Người chơi và kẻ địch nằm trên cùng một Hàng (Y)
+        else {
             if (enemy.getPixelY() % SCALED_SIZE != 0) {
                 return NONE;
             }
@@ -68,6 +82,8 @@ public class HeadPath extends Path{
             if (!check) {
                 return NONE;
             }
+
+            // Kiểm tra vật cản (Bom và Block) ở khoảng giữa hai thực thể theo trục ngang
             if (player.getTileX() < enemy.getTileX()) {
                 for (Bomb bomb: map.getBombs()) {
                     if (bomb.getTileX() >= player.getTileX() && bomb.getTileX() <= enemy.getTileX()) {
@@ -93,6 +109,7 @@ public class HeadPath extends Path{
             }
         }
 
+        // Xử lý khi cả hai nằm trong cùng một ô Tile (xác định hướng theo pixel)
         if (player.getTileX() == enemy.getTileX() && player.getTileY() == enemy.getTileY()) {
             if (Math.abs(player.getPixelX() - enemy.getPixelX()) > Math.abs(player.getPixelY() - enemy.getPixelY())) {
                 if (player.getPixelX() < enemy.getPixelX()) {
@@ -109,6 +126,7 @@ public class HeadPath extends Path{
             }
         }
 
+        // Trả về hướng di chuyển tấn công dựa trên vị trí tương đối của Tile
         if (player.getTileX() == enemy.getTileX()) {
             if (player.getTileY() < enemy.getTileY()) {
                 return UP;
