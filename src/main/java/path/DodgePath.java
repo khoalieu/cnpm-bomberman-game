@@ -11,6 +11,7 @@ import static variables.Variables.DIRECTION.*;
 
 /**
  * Thuật toán né tránh và tìm đường nâng cao, ưu tiên tránh Tường cứng (Wall)
+ * Triển khai logic điều khiển AI cho các quái vật thông minh (như Kondoria) theo UC4.
  */
 public class DodgePath extends Path {
     public DodgePath(Map map, Bomber player, Enemy enemy) {
@@ -18,15 +19,18 @@ public class DodgePath extends Path {
     }
     /*
     |--------------------------------------------------------------------------
-    | AI Logic
+    | AI Logic - Thực hiện UC4.2 & UC4.3
     |--------------------------------------------------------------------------
      */
     @Override
     public DIRECTION path() {
-        // Chỉ tính toán lại hướng đi khi quái vật đã nằm gọn trong một ô lưới
+        // UC4.1: Hệ thống kiểm tra điều kiện để bắt đầu chu kỳ tính toán hướng mới
         if (enemy.isInATile()) {
 
-            // Trường hợp 1: Nếu người chơi ở ngay sát bên (khoảng cách = 1), xác định hướng tấn công trực diện
+            // =============================================================
+            // UC4.5: Kiểm tra va chạm giữa quái vật và Bomber (Khoảng cách = 1)
+            // Hệ thống xác định hướng tấn công trực diện để tiêu diệt người chơi
+            // =============================================================
             if (Distance(enemy.getTileY(), enemy.getTileX(), player.getTileY(), player.getTileX(), true) == 1) {
                 int enemyPixelX = enemy.getPixelX();
                 int enemyPixelY = enemy.getPixelY();
@@ -40,15 +44,21 @@ public class DodgePath extends Path {
                 }
                 return nowDirection;
             }
-            // Trường hợp 2: Tìm hướng đi có khoảng cách ngắn nhất đến người chơi, né tránh Tường cứng
+
+            // =============================================================
+            // UC4.3: Hệ thống tính toán hướng di chuyển tối ưu (x', y')
+            // Ưu tiên các ô không vướng vật cản để duy trì luồng di chuyển mượt mà
+            // =============================================================
             int minDistance = INF;
             DIRECTION nowDirection = UP;
             for (int k = 0; k < 4; k++) {
-                // Kiểm tra nếu ô tiếp theo không phải là Tường cứng (Wall)
+
+                // UC4.4a.1: Kiểm tra tọa độ dự kiến có chứa Tường cứng (Wall) hay không
                 if (!(map.getTile(enemy.getTileX() + dx[k], enemy.getTileY() + dy[k]) instanceof Wall)) {
 
-                    // Bỏ qua hướng đi nếu vướng phải các vật cản khác (như Bom)
+                    // UC4.4a.1 (tiếp): Kiểm tra va chạm với các vật cản khác (như Bom)
                     if (enemy.checkTileCollider(intToDirection(k), true)) {
+                        // UC4.4a.2: Hệ thống bỏ qua hướng di chuyển bị chặn
                         continue;
                     }
 
@@ -56,7 +66,7 @@ public class DodgePath extends Path {
                     int curDistance = Distance(enemy.getTileY() + dy[k], enemy.getTileX() + dx[k],
                             player.getTileY(), player.getTileX(), true);
 
-                    // Cập nhật hướng đi tối ưu nhất (khoảng cách nhỏ nhất)
+                    // Cập nhật hướng đi tối ưu nhất (UC4.3)
                     if (minDistance > curDistance) {
                         minDistance = curDistance;
                         nowDirection = intToDirection(k);
@@ -65,7 +75,10 @@ public class DodgePath extends Path {
             }
             return nowDirection;
         } else {
-            // Tiếp tục di chuyển theo hướng hiện tại nếu chưa vào giữa ô lưới
+            // =============================================================
+            // UC4.4: Nếu chưa vào giữa ô lưới, quái vật tiếp tục di chuyển
+            // theo hướng cũ để đảm bảo tính liên tục của hoạt ảnh
+            // =============================================================
             return enemy.getDirection();
         }
     }

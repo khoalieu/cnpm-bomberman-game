@@ -11,6 +11,7 @@ import static variables.Variables.*;
 
 /**
  * Thuật toán tìm đường thông minh dựa trên khoảng cách tới người chơi.
+ * Triển khai chi tiết bước UC4.2 và UC4.3 trong kịch bản điều khiển quái vật.
  */
 public class DistancePath extends Path {
 
@@ -19,14 +20,17 @@ public class DistancePath extends Path {
     }
     /*
     |--------------------------------------------------------------------------
-    | AI Logic
+    | AI Logic - Thực hiện UC4.2 & UC4.3
     |--------------------------------------------------------------------------
      */
     public DIRECTION path() {
-        // Chỉ tính toán hướng đi mới khi quái vật nằm gọn trong một ô lưới
+        // Hệ thống chỉ tính toán lại hướng đi khi thực thể đã nằm gọn trong một ô lưới (Grid)
         if (enemy.isInATile()) {
 
-            // Trường hợp 1: Nếu khoảng cách bằng 1, tìm hướng tấn công trực tiếp người chơi
+            // =============================================================
+            // UC4.3: Trường hợp tấn công trực diện (Khoảng cách = 1)
+            // Hệ thống xác định hướng di chuyển dự kiến để va chạm với Bomber (UC4.5)
+            // =============================================================
             if (Distance(enemy.getTileY(), enemy.getTileX(), player.getTileY(), player.getTileX(), false) == 1) {
                 int enemyPixelX = enemy.getPixelX();
                 int enemyPixelY = enemy.getPixelY();
@@ -41,7 +45,10 @@ public class DistancePath extends Path {
                 return nowDirection;
             }
 
-            // Trường hợp 2: Tìm hướng đi tối ưu (khoảng cách ngắn nhất) thông qua các ô cỏ (Grass)
+            // =============================================================
+            // UC4.3 (tiếp): Tìm hướng đi tối ưu thông qua các ô cỏ (Grass)
+            // Đây là logic AI cốt lõi để xác định tọa độ dự kiến (x', y')
+            // =============================================================
             int minDistance = INF;
             DIRECTION nowDirection = UP;
             for (int k = 0; k < 4; k++) {
@@ -49,9 +56,11 @@ public class DistancePath extends Path {
                     int curDistance = Distance(enemy.getTileY() + dy[k], enemy.getTileX() + dx[k],
                             player.getTileY(), player.getTileX(), false);
 
-                    // Bỏ qua nếu hướng đi này vướng vật cản
+                    // =============================================================
+                    // UC4.4a.1: Kiểm tra vật cản (Wall, Brick, Bomb) tại ô mục tiêu
+                    // =============================================================
                     if (enemy.checkTileCollider(intToDirection(k), true)) {
-                        continue;
+                        continue; // UC4.4a.2: Bỏ qua hướng đi bị chặn
                     }
 
                     // Cập nhật hướng đi dẫn đến khoảng cách ngắn nhất tới người chơi
@@ -63,7 +72,9 @@ public class DistancePath extends Path {
             }
             return nowDirection;
         } else {
-            // Tiếp tục di chuyển theo hướng hiện tại nếu quái vật chưa vào giữa ô lưới
+            // =============================================================
+            // UC4.4: Duy trì hướng di chuyển hiện tại nếu chưa vào giữa ô lưới
+            // =============================================================
             return enemy.getDirection();
         }
     }

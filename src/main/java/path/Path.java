@@ -15,6 +15,7 @@ import static variables.Variables.DIRECTION.*;
 
 /**
  * Lớp trừu tượng định nghĩa các thuật toán tìm đường cho kẻ địch
+ * Cung cấp công cụ tính toán khoảng cách cho UC4.2 và UC4.3
  */
 public abstract class Path {
 
@@ -60,38 +61,36 @@ public abstract class Path {
     // Chuyển đổi số nguyên sang kiểu dữ liệu DIRECTION tương ứng
     public DIRECTION intToDirection(int x) {
         switch (x) {
-            case 0:
-                return UP;
-            case 1:
-                return DOWN;
-            case 2:
-                return LEFT;
-            case 3:
-                return RIGHT;
-            default:
-                return NONE;
+            case 0: return UP;
+            case 1: return DOWN;
+            case 2: return LEFT;
+            case 3: return RIGHT;
+            default: return NONE;
         }
-
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Pathfinding Logic (BFS)
+    | Pathfinding Logic (BFS) - Hiện thực hóa UC4.3
     |--------------------------------------------------------------------------
      */
 
     /**
-     * Tính toán khoảng cách ngắn nhất giữa hai điểm sử dụng thuật toán BFS
-     * @param dodge Nếu true, cho phép tính toán xuyên qua các vật thể không phải Tường cứng (Wall)
+     * UC4.3: Tính toán khoảng cách ngắn nhất giữa hai điểm.
+     * Đây là logic nền tảng để xác định quái vật nên di chuyển theo hướng nào (x', y').
+     * @param dodge Nếu true, hỗ trợ logic xử lý ngoại lệ cho các quái vật đi xuyên gạch.
      */
     public int Distance(int x1, int y1, int x2, int y2, boolean dodge) {
+        // UC4.4a.1: Kiểm tra nếu đích đến là vật cản không thể đi qua
         if (map.getTile(y2, x2).isBlock()) {
             return INF;
         }
+
+        // Kiểm tra vật cản tại điểm bắt đầu
         if (map.getTile(y1, x1).isBlock()) {
             if (dodge) {
                 if (map.getTile(y1, x1) instanceof Wall) {
-                    return INF;
+                    return INF; // Tường cứng luôn là vật cản tuyệt đối
                 }
             } else {
                 return INF;
@@ -101,16 +100,18 @@ public abstract class Path {
         int statusTiles[][] = new int[HEIGHT][WIDTH];
         int distanceTiles[][] = new int [HEIGHT][WIDTH];
 
-        // Khởi tạo trạng thái vật cản cho từng ô trên bản đồ
+        // =========================================================================
+        // UC4.4a.1: Hệ thống quét bản đồ và xác định các thực thể gây chặn (Wall, Brick)
+        // =========================================================================
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 distanceTiles[i][j] = INF;
                 Entity tile = map.getTile(j, i);
                 if (tile.isBlock()) {
                     statusTiles[i][j] = 1;
-                    // Nếu ở chế độ né tránh (dodge), các khối như Gạch (Brick) không được tính là vật cản
+                    // Xử lý đặc biệt cho quái vật có khả năng xuyên gạch (Kondoria)
                     if (dodge && !(tile instanceof Wall)) {
-                        statusTiles[i][j] = 0;
+                        statusTiles[i][j] = 0; // Brick không còn là vật cản
                     }
                 } else {
                     statusTiles[i][j] = 0;
@@ -118,20 +119,27 @@ public abstract class Path {
             }
         }
 
-        // Cập nhật vị trí các quả bom hiện có thành vật cản
+        // =========================================================================
+        // UC4.4a.1 (tiếp): Cập nhật vị trí Bom thành vật cản trong mắt AI quái vật
+        // =========================================================================
         for (Bomb bomb: map.getBombs()) {
             statusTiles[bomb.getTileY()][bomb.getTileX()] = 1;
         }
 
-        // Thực hiện thuật toán tìm kiếm theo chiều rộng (BFS) để tính khoảng cách
+        // =========================================================================
+        // UC4.3: Thực hiện thuật toán BFS để tìm đường đi ngắn nhất tới Bomber
+        // Hệ thống duyệt qua 4 hướng để tìm tọa độ (x', y') tối ưu.
+        // =========================================================================
         Queue<Vertex> pq = new LinkedList<>();
         pq.add(new Vertex(x1, y1, 0));
         distanceTiles[x1][y1] = 0;
+
         while (!pq.isEmpty()) {
             Vertex cur = pq.poll();
             for (int k = 0; k < 4; k++) {
                 int _x = cur.x + dx[k];
                 int _y = cur.y + dy[k];
+                // Kiểm tra ô kế tiếp có hợp lệ và không vướng vật cản (UC4.4a) hay không
                 if (isValid(_x, _y) && statusTiles[_x][_y] == 0 && distanceTiles[_x][_y] == INF) {
                     distanceTiles[_x][_y] = cur.value + 1;
                     pq.add(new Vertex(_x, _y, cur.value + 1));
@@ -147,6 +155,8 @@ public abstract class Path {
     |--------------------------------------------------------------------------
      */
 
-    // Hàm trừu tượng trả về hướng di chuyển tiếp theo dựa trên thuật toán AI cụ thể
+    /**
+     * UC4.2: Phương thức trừu tượng để lớp con trả về hướng di chuyển (DIRECTION).
+     */
     public abstract DIRECTION path();
 }
