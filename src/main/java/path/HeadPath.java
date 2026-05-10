@@ -11,6 +11,7 @@ import static variables.Variables.DIRECTION.*;
 
 /**
  * Thuật toán HeadPath: Kẻ địch tấn công khi phát hiện người chơi nằm trên cùng một hàng hoặc cột (tầm nhìn thẳng)
+ * Triển khai logic AI tấn công trực diện theo UC4.2 và UC4.3.
  */
 public class HeadPath extends Path{
     public HeadPath(Map map, Bomber player, Enemy enemy) {
@@ -18,17 +19,21 @@ public class HeadPath extends Path{
     }
     /*
     |--------------------------------------------------------------------------
-    | AI Logic
+    | AI Logic - Thực hiện UC4.2 & UC4.3
     |--------------------------------------------------------------------------
      */
     @Override
     public DIRECTION path() {
-        // Nếu không cùng hàng hoặc cùng cột, không kích hoạt trạng thái đuổi theo trực diện
+        // UC4.2: Hệ thống kiểm tra điều kiện kích hoạt trạng thái đuổi theo trực diện
+        // Nếu không cùng hàng hoặc cùng cột, AI HeadPath trả về NONE để chuyển sang AI phụ
         if (player.getTileX() != enemy.getTileX() && player.getTileY() != enemy.getTileY()) {
             return NONE;
         }
 
-        // Trường hợp: Người chơi và kẻ địch nằm trên cùng một Cột (X)
+        // =============================================================
+        // UC4.3: Trường hợp người chơi và kẻ địch nằm trên cùng một Cột (X)
+        // Hệ thống kiểm tra tính khả thi của việc di chuyển theo trục dọc
+        // =============================================================
         if (player.getTileX() == enemy.getTileX()) {
             if (enemy.getPixelX() % SCALED_SIZE != 0) {
                 return NONE;
@@ -43,16 +48,19 @@ public class HeadPath extends Path{
                 return NONE;
             }
 
-            // Kiểm tra vật cản (Bom và Block) ở khoảng giữa hai thực thể theo trục dọc
+            // =========================================================================
+            // UC4.4a.1: Kiểm tra vật cản (Bom và Block) ở khoảng giữa hai thực thể
+            // Nếu có vật cản, tầm nhìn bị chặn, hệ thống dừng logic tấn công (UC4.4a.2)
+            // =========================================================================
             if (player.getTileY() < enemy.getTileY()) {
                 for (Bomb bomb: map.getBombs()) {
                     if (bomb.getTileY() >= player.getTileY() && bomb.getTileY() <= enemy.getTileY()) {
-                        return NONE;
+                        return NONE; // Bị chặn bởi Bom
                     }
                 }
                 for (int i = player.getTileY(); i < enemy.getTileY(); i++) {
                     if (map.getTile(player.getTileX(), i).isBlock()) {
-                        return NONE;
+                        return NONE; // Bị chặn bởi Tường/Gạch
                     }
                 }
             } else {
@@ -68,7 +76,10 @@ public class HeadPath extends Path{
                 }
             }
         }
-        // Trường hợp: Người chơi và kẻ địch nằm trên cùng một Hàng (Y)
+        // =============================================================
+        // UC4.3: Trường hợp người chơi và kẻ địch nằm trên cùng một Hàng (Y)
+        // Hệ thống tính toán hướng di chuyển dự kiến theo trục ngang
+        // =============================================================
         else {
             if (enemy.getPixelY() % SCALED_SIZE != 0) {
                 return NONE;
@@ -83,7 +94,9 @@ public class HeadPath extends Path{
                 return NONE;
             }
 
-            // Kiểm tra vật cản (Bom và Block) ở khoảng giữa hai thực thể theo trục ngang
+            // =========================================================================
+            // UC4.4a.1: Kiểm tra vật cản ngang (Bom/Block) chặn tầm nhìn của quái vật
+            // =========================================================================
             if (player.getTileX() < enemy.getTileX()) {
                 for (Bomb bomb: map.getBombs()) {
                     if (bomb.getTileX() >= player.getTileX() && bomb.getTileX() <= enemy.getTileX()) {
@@ -109,7 +122,10 @@ public class HeadPath extends Path{
             }
         }
 
-        // Xử lý khi cả hai nằm trong cùng một ô Tile (xác định hướng theo pixel)
+        // =============================================================
+        // UC4.5: Xử lý khi cả hai nằm trong cùng một ô Tile
+        // Hệ thống tinh chỉnh hướng để kích hoạt va chạm sát thương (Death)
+        // =============================================================
         if (player.getTileX() == enemy.getTileX() && player.getTileY() == enemy.getTileY()) {
             if (Math.abs(player.getPixelX() - enemy.getPixelX()) > Math.abs(player.getPixelY() - enemy.getPixelY())) {
                 if (player.getPixelX() < enemy.getPixelX()) {
@@ -126,7 +142,10 @@ public class HeadPath extends Path{
             }
         }
 
-        // Trả về hướng di chuyển tấn công dựa trên vị trí tương đối của Tile
+        // =============================================================
+        // UC4.3 (Kết quả): Trả về hướng di chuyển tấn công cuối cùng
+        // dựa trên vị trí tương đối giữa quái vật và Bomber
+        // =============================================================
         if (player.getTileX() == enemy.getTileX()) {
             if (player.getTileY() < enemy.getTileY()) {
                 return UP;

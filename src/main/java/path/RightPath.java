@@ -9,6 +9,7 @@ import static variables.Variables.DIRECTION.*;
 
 /**
  * Thuật toán RightPath: Kết hợp khả năng tấn công trực diện (HeadPath) và ưu tiên rẽ phải khi gặp vật cản
+ * Triển khai logic AI linh hoạt theo quy trình UC4.2 và UC4.3
  */
 public class RightPath extends Path{
     public RightPath(Map map, Bomber player, Enemy enemy) {
@@ -16,29 +17,42 @@ public class RightPath extends Path{
     }
     /*
     |--------------------------------------------------------------------------
-    | AI Logic
+    | AI Logic - Thực hiện UC4.2 & UC4.3
     |--------------------------------------------------------------------------
      */
     @Override
     public DIRECTION path() {
-        // Ưu tiên kiểm tra xem có thể tấn công thẳng vào người chơi hay không
+        // =========================================================================
+        // UC4.2: Hệ thống ưu tiên kiểm tra thuật toán tấn công trực diện (HeadPath)
+        // Đây là bước xác định trạng thái AI: "Truy đuổi" hay "Tuần tra"
+        // =========================================================================
         DIRECTION headPath = new HeadPath(map, player, enemy).path();
 
         if (headPath == NONE) {
-            // Khi không thấy người chơi: Di chuyển ở tốc độ bình thường
+            // =============================================================
+            // TRẠNG THÁI TUẦN TRA: Khi không phát hiện người chơi (UC4.3)
+            // =============================================================
             enemy.setSpeed(1);
+
+            // UC4.4a.1: Hệ thống phát hiện va chạm với vật cản môi trường (isCollider)
             if (enemy.isCollider()) {
-                // Xử lý va chạm: Kiểm tra ô bên phải, nếu bị chặn thì quay lại bên trái
+                // =============================================================
+                // UC4.4a.2: Hệ thống kích hoạt logic chọn hướng mới (Quy tắc rẽ phải/trái)
+                // =============================================================
                 if (enemy.checkTileCollider(RIGHT, false)) {
-                    return LEFT;
+                    return LEFT; // Nếu bên phải bị chặn, quay lại bên trái
                 } else {
-                    return RIGHT;
+                    return RIGHT; // Ưu tiên rẽ phải nếu trống
                 }
             } else {
+                // UC4.4: Nếu không có vật cản, tiếp tục di chuyển theo hướng hiện tại
                 return enemy.getDirection();
             }
         } else {
-            // Khi phát hiện người chơi: Tăng tốc độ để truy đuổi trực diện
+            // =============================================================
+            // TRẠNG THÁI TRUY ĐUỔI: Khi phát hiện người chơi (UC4.3 & UC4.5)
+            // Hệ thống tăng tốc độ và hướng trực tiếp tới tọa độ của Bomber
+            // =============================================================
             enemy.setSpeed(2);
             return headPath;
         }
