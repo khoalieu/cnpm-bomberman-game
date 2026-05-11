@@ -66,9 +66,7 @@ public class Map {
         player.setSpeed(2);
         time = 60*200;
     }
-    // ==============================
-    // UC1.2: Xác định tệp cấu hình của màn chơi tương ứng
-    // ==============================
+    // [UC1.2 - Bước 1.6]: Yêu cầu khởi tạo map (Đọc file txt từ Variables)
     public void createMap(String mapPath) throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(mapPath));
         topInfoImage = new Image("/top_info.png");
@@ -76,16 +74,12 @@ public class Map {
         levelNumber = _string.charAt(0) - '0';
         resetEntities();
         revival = false;
-        // ==============================
-        // UC1.3: Duyệt qua từng ký tự trong ma trận tệp text
-        // ==============================
+        // [UC1.4]: Vòng lặp duyệt từng dòng (i) và từng ký tự (j) trong ma trận
         for (int i = 0; i < HEIGHT; i++) {
             String string = scanner.nextLine();
             for (int j = 0; j < WIDTH; j++) {
-                char c = string.charAt(j);
-                // ==============================
-                // UC1.4: Phân tích ký tự để khởi tạo thực thể tương ứng
-                // ==============================
+                char c = string.charAt(j); // [UC1.4 - Bước 1.6.1]: Phân tích ký tự 'c'
+                // [UC1.4 - Bước 1.6.2 & 1.6.3]: Tạo StaticEntity (Wall, Grass...)
                 tiles[i][j] = StaticTexture.setStatic(c, i, j);
                 // ==============================
                 // UC1.5: Lưu tất cả các đối tượng vừa tạo vào danh sách quản lý đồ họa
@@ -96,8 +90,9 @@ public class Map {
                 if (c == '*') {
                     tiles[i][j] = BrickTexture.setBrick(i, j);
                 }
+                // [UC1.4 - Bước 1.6.4 & 1.6.5]: Tạo AnimateEntity (Bomber, Enemy...)
                 Character character = CharacterTexture.setCharacter(c, i, j);
-
+                // [UC1.4 - Bước 1.6.6]: Phân loại và lưu vào các danh sách quản lý (player, enemies)
                 if (character != null) {
                     if (c == 'p') {
                         player = (Bomber) character;
@@ -213,6 +208,8 @@ public class Map {
                 writer.print(MainGame.getScore());
                 writer.close();
             } catch (FileNotFoundException e) {
+                // [UC1.2a - Bước 2.1]: Phát hiện FileNotFoundException (Không tìm thấy file)
+                // [UC1.2a - Bước 2.2]: Ghi nhật ký lỗi (log) ra Console
                 System.out.println(e);
             }
         }

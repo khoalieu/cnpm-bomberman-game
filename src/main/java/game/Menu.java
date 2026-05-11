@@ -51,7 +51,10 @@ public class Menu {
         graphicsContext.fillText("Start", SCALED_SIZE * 6.7, SCALED_SIZE * 10.93);
         graphicsContext.fillText("Exit", SCALED_SIZE * 7.14, SCALED_SIZE * 11.95);
         graphicsContext.fillText("Highscore: " + String.valueOf(highscore), SCALED_SIZE * 4.5, SCALED_SIZE * 12.95);
+
+        // [UC1.1 - Bước 1.2]: Chủ động lấy trạng thái phím từ hệ thống Input
         direction = keyInput.handleKeyInput();
+        // [UC1.1 - Bước 1.3]: Làm mới trạng thái phím (Chống nhận lặp sự kiện)
         keyInput.initialization();
         if (direction == UP) {
             state = 1;
@@ -59,9 +62,7 @@ public class Menu {
         if (direction == DOWN) {
             state = 0;
         }
-        // ==============================
-        // UC1.1: Người chơi chọn bắt đầu trò chơi mới từ giao diện Menu
-        // ==============================
+        // [UC1.1 - Bước 1.4]: Trả về DIRECTION.DESTROYED (Chọn Start) -> Cập nhật trạng thái start = true
         if (direction == DESTROYED && state == 1) {
             start = true;
             Sound.menu_sound.stop();
