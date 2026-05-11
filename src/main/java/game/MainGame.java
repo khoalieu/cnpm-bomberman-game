@@ -71,6 +71,10 @@ public class MainGame extends Application {
         Sound.menu_sound.play();
         Sound.menu_sound.loop();
         countdown = 160;
+        // [UC1.6 - Bước 1.8]: Bắt đầu phát nhạc nền stage
+        // (Nếu bạn gọi Sound.stage_sound.play() ở đâu đó trước vòng lặp thì comment ở đó)
+
+        // [UC1.6 - Bước 1.9]: Khởi chạy AnimationTimer (Game Loop: Update & Render liên tục)
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long currentTime) {
