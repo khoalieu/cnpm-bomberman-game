@@ -8,6 +8,7 @@ import entity.staticentity.Portal;
 import entity.staticentity.Wall;
 import game.MainGame;
 import graphics.Sprite;
+import variables.Variables;
 import variables.Variables.DIRECTION;
 
 import static variables.Variables.*;
@@ -197,4 +198,39 @@ public abstract class Character extends AnimateEntity {
     }
 
     public abstract void setDirection();
+
+    // ==========================================
+    // BỔ SUNG CÁC HÀM GETTER / SETTER NÀY
+    // VÀO FILE Character.java (hoặc Bomber.java)
+    // ==========================================
+
+    public int getVelocityX() {
+        // Trả về vận tốc trục X hiện tại.
+        // Tuỳ vào cách bạn code ở lớp cha, biến này có thể tên là velX, velocityX, v.v.
+        return this.velocityX;
+    }
+
+    public int getVelocityY() {
+        // Trả về vận tốc trục Y hiện tại.
+        return this.velocityY;
+    }
+
+    public boolean isCollision() {
+        return this.isCollision;
+    }
+
+    public void setCollision(boolean collision) {
+        this.isCollision = collision;
+    }
+
+    public int getPixelY() {
+        return this.pixelY;
+    }
+
+    public void setPixelY(int y) {
+        this.pixelY = y;
+    }
+
+    // Thuộc tính Life nằm ở Bomber, và theo file Map.java bạn gửi,
+    // có vẻ hàm getLife() đã tồn tại, nên không cần viết lại.
 }

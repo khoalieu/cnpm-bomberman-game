@@ -85,6 +85,23 @@ public abstract class Entity {
     public int getPixelY() {
         return pixelY;
     }
+
+    public void setTileY(int tileY) {
+        this.tileY = tileY;
+    }
+
+    public void setTileX(int tileX) {
+        this.tileX = tileX;
+    }
+
+    public void setPixelY(int pixelY) {
+        this.pixelY = pixelY;
+    }
+
+    public void setPixelX(int pixelX) {
+        this.pixelX = pixelX;
+    }
+
     public void setTile(int x, int y) {
         tileX = x;
         tileY = y;
