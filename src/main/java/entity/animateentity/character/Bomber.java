@@ -157,9 +157,12 @@ public class Bomber extends Character {
     }
     private void handleEnemyCollision() {
         map.getEnemies().forEach(enemy -> {
+        // ====================================
+        // UC5.3a.1. Hệ thống phát hiện Bomber va chạm với quái vật hoặc lửa nổ.
+        // ====================================
             if (this.isCollider(enemy) && immortal == 0) {
         //================================
-        // UC5.3a - Hệ thống phát hiện Bomber bị tiêu diệt
+        // UC5.3 - Hệ thống kiểm tra trạng thái của Bomber
         //================================
                 destroy();
             }
@@ -209,10 +212,16 @@ public class Bomber extends Character {
 
     @Override
     public void delete() {
+        // =====================================
+	    // UC5.3a - Bomber chết nhưng vẫn còn mạng hồi sinh
+	    // =====================================
+        //UC5.3a.2. Hệ thống giảm số mạng hiện tại
         this.life--;
         timeRevival = 7;
         immortal = 100;
+        //UC5.3a.3. Hệ thống kích hoạt trạng thái hồi sinh
         map.setRevival(true);
+        //UC5.3a.4. Bomber được đưa về vị trí bắt đầu
         setPosition(SCALED_SIZE, SCALED_SIZE);
         destroyed = false;
         direction = NONE;
