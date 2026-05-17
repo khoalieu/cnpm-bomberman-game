@@ -16,7 +16,6 @@ public class Portal extends StaticEntity {
 
     @Override
     // =====================================
-    // UC5.4 - Hệ thống kiểm tra điều kiện hoàn thành màn chơi
     // UC5.5 - Portal được kích hoạt khi tất cả quái vật bị tiêu diệt
     // =====================================
     public void update() {

@@ -170,9 +170,6 @@ public class MainGame extends Application {
                         // ==============================
                         // UC5.1a - Hết thời gian chơi
                             //UC5.1a.1	Bộ đếm thời gian giảm về 0.
-                            //UC5.1a.2	Hệ thống chuyển trạng thái trò chơi sang Game Over.
-                            //UC5.1a.3	Hệ thống hiển thị thông báo Game Over.
-                        // ==============================
                         if (countdown == 0) {
                             countdown = 160;
                             choseStart = false;
@@ -212,8 +209,18 @@ public class MainGame extends Application {
     }
 
     public static void setBackToMenu(boolean backToMenu) {
+        // =====================================
+        // UC5.1a.2 - Hệ thống chuyển trạng thái Game Over
+        // =====================================
+       
+        // =====================================
+        // UC5.3b.2 - Hệ thống chuyển trạng thái trò chơi sang Game Over
+        // =====================================
         MainGame.backToMenu = backToMenu;
         if (map.getBombs().size() > 0) {
+            // =====================================
+            // UC5.1a.3 - Hệ thống hiển thị thông báo Game Over
+            // =====================================
             map.getBombs().remove(0);
         }
     }
