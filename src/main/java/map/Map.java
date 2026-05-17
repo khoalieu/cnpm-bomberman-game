@@ -29,12 +29,21 @@ public class Map {
     private static int levelNumber;
     private int time = 60 * 200;
     private Image topInfoImage;
-    private Entity[][] tiles;
-    private ArrayList<Enemy> enemies;
-    private ArrayList<Bomb> bombs;
-    private ArrayList<Flame> flames;
-    private ArrayList<Item> items;
-    private ArrayList<Score> scores;
+//    private Entity[][] tiles;
+
+    //    private ArrayList<Enemy> enemies;
+//    private ArrayList<Bomb> bombs;
+//    private ArrayList<Flame> flames;
+//    private ArrayList<Item> items;
+//    private ArrayList<Score> scores;
+    private Entity[][] tiles = new Entity[HEIGHT][WIDTH];
+
+    private ArrayList<Enemy> enemies = new ArrayList<>();
+    private ArrayList<Bomb> bombs = new ArrayList<>();
+    private ArrayList<Flame> flames = new ArrayList<>();
+    private ArrayList<Item> items = new ArrayList<>();
+    private ArrayList<Score> scores = new ArrayList<>();
+
     private Bomber player;
     private boolean revival;
     private int renderX;
@@ -59,13 +68,15 @@ public class Map {
     public ArrayList<Enemy> getEnemies() {
         return enemies;
     }
+
     public void resetNumber() {
         Flame.flameLength = 1;
         Bomb.limit = 1;
         MainGame.setNewScore(-MainGame.getScore());
         player.setSpeed(2);
-        time = 60*200;
+        time = 60 * 200;
     }
+
     // [UC1.2 - Bước 1.6]: Yêu cầu khởi tạo map (Đọc file txt từ Variables)
     public void createMap(String mapPath) throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(mapPath));
@@ -103,6 +114,7 @@ public class Map {
             }
         }
     }
+
     // =====================================
     // UC5.8 - Hệ thống dọn dẹp dữ liệu màn hiện tại
     // =====================================
@@ -201,7 +213,7 @@ public class Map {
     public void renderTopInfo(GraphicsContext graphicsContext) {
         graphicsContext.drawImage(topInfoImage, 0, 0);
         graphicsContext.fillText("Score: " + String.valueOf(MainGame.getScore()), 0.6 * SCALED_SIZE, SCALED_SIZE * 0.8);
-        if(MainGame.getScore() > Menu.getHighscore()) {
+        if (MainGame.getScore() > Menu.getHighscore()) {
             try {
                 PrintWriter writer = new PrintWriter("src/main/resources/menu/highscore.txt");
                 writer.print("");
@@ -221,7 +233,7 @@ public class Map {
         }
         graphicsContext.fillText("Stage: " + String.valueOf(levelNumber), 10.6 * SCALED_SIZE, SCALED_SIZE * 0.8);
         graphicsContext.fillText("Life: " + String.valueOf(player.getLife()), 10.6 * SCALED_SIZE, SCALED_SIZE * 1.6);
-        if(player.getLife() == 0) {
+        if (player.getLife() == 0) {
             MainGame.setBackToMenu(true);
         }
     }
@@ -332,6 +344,7 @@ public class Map {
     public static int getLevelNumber() {
         return levelNumber;
     }
+
     public Entity[][] getTiles() {
         return tiles;
     }
