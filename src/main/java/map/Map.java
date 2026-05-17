@@ -332,4 +332,7 @@ public class Map {
     public static int getLevelNumber() {
         return levelNumber;
     }
+    public Entity[][] getTiles() {
+        return tiles;
+    }
 }
