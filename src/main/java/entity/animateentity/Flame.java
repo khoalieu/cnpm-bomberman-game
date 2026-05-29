@@ -4,6 +4,7 @@ import entity.Entity;
 import entity.staticentity.*;
 import graphics.Sprite;
 import variables.Variables;
+import map.Map;
 
 import static variables.Variables.FLAME_SHAPE.*;
 
@@ -110,5 +111,15 @@ public class Flame extends AnimateEntity {
     @Override
     public void delete() {
         this.remove();
+    }
+
+    // Phương thức phá hủy vật phẩm khi bom nổ (được yêu cầu áp dụng thử ở màn 1, sau này sẽ dùng cho màn 2)
+    public void destroyItemWhenBombExplodes(Entity entity) {
+        if (Map.getLevelNumber() == 1) {
+            entity.remove();
+            if (entity instanceof Item) {
+                ((Item) entity).delete();
+            }
+        }
     }
 }

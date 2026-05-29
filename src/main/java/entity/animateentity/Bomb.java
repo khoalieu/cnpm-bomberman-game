@@ -113,19 +113,19 @@ public class Bomb extends AnimateEntity {
                 // Cập nhật trạng thái tia lửa và biến đếm âm thanh
                 switch (dir) {
                     case "down" -> {
-                        down = false;
+                        // down = false; // Cho phép xuyên qua bom
                         if (bomb.up) cnt++;
                     }
                     case "up" -> {
-                        up = false;
+                        // up = false; // Cho phép xuyên qua bom
                         if (bomb.down) cnt++;
                     }
                     case "right" -> {
-                        right = false;
+                        // right = false; // Cho phép xuyên qua bom
                         if (bomb.left) cnt++;
                     }
                     case "left" -> {
-                        left = false;
+                        // left = false; // Cho phép xuyên qua bom
                         if (bomb.right) cnt++;
                     }
                 }
@@ -155,11 +155,15 @@ public class Bomb extends AnimateEntity {
     private void checkWallCollision(int x, int y, String dir, Flame centerFlame) {
         if (!(map.getTile(x, y) instanceof Grass)) {
             centerFlame.interactWith(map.getTile(x, y));
-            switch (dir) {
-                case "down" -> down = false;
-                case "up" -> up = false;
-                case "right" -> right = false;
-                case "left" -> left = false;
+            // Nếu ô không biến thành Grass sau khi tương tác (ví dụ như gạch chưa vỡ hẳn, hoặc tường) thì chặn lại
+            // Ngược lại, nếu thành Grass (item bị phá hủy) thì cho xuyên qua
+            if (!(map.getTile(x, y) instanceof Grass)) {
+                switch (dir) {
+                    case "down" -> down = false;
+                    case "up" -> up = false;
+                    case "right" -> right = false;
+                    case "left" -> left = false;
+                }
             }
         }
     }
