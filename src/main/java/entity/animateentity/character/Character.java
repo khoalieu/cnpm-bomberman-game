@@ -2,6 +2,7 @@ package entity.animateentity.character;
 
 import entity.animateentity.AnimateEntity;
 import entity.animateentity.Bomb;
+import entity.animateentity.Brick;
 import entity.animateentity.character.enemy.Enemy;
 import entity.Entity;
 import entity.staticentity.Portal;
@@ -40,6 +41,10 @@ public abstract class Character extends AnimateEntity {
         stand = true;
         direction = NONE;
         immortal = 0;
+    }
+
+    protected boolean canPass(Entity entity) {
+        return false; // Mặc định các nhân vật không thể đi xuyên vật cản
     }
 
     public void setVelocity(int velocityX, int velocityY) {
@@ -84,7 +89,9 @@ public abstract class Character extends AnimateEntity {
             for (int j = 0; j < WIDTH; j++) {
                 Entity entity = map.getTile(j, i);
                 if (entity.isBlock() && this.isCollider(entity)) {
-                    isCollision = true;
+                    if (!canPass(entity)) {
+                        isCollision = true;
+                    }
                 }
                 // =====================================
                 // UC5.6 - Bomber đi vào Portal đã được kích hoạt("entity instanceof Portal")
@@ -100,13 +107,12 @@ public abstract class Character extends AnimateEntity {
             }
         }
         map.getBombs().forEach(bomb -> {
-            Entity entity1 = bomb;
-            if (entity1.isBlock() && this.isCollider(entity1)) {
-                if (immortal == 0) {
+            if (this.isCollider(bomb) && bomb.isBlock()) {
+                if (!canPass(bomb) && immortal == 0) {
                     isCollision = true;
                 }
             }
-            if(this.isCollider(entity1) && this instanceof Enemy) {
+            if(this.isCollider(bomb) && this instanceof Enemy) {
                 if (immortal == 0) {
                     isCollision = true;
                 }

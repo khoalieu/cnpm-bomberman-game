@@ -89,8 +89,21 @@ public class Flame extends AnimateEntity {
         // ==============================
         // UC3.8a.3. Nếu chạm Người chơi (Player): Hệ thống trừ mạng người chơi
         // ==============================
+        // =============================================================
+        // UC2.4c.1. Nếu hệ thống phát hiện tọa độ đè lên Quái vật (Enemy) hoặc vùng Lửa nổ (Flame),
+        // hệ thống kiểm tra cờ trạng thái Bất tử (Invincible).
+        // =============================================================
         if (this.isCollider(map.getPlayer()) && map.getPlayer().getImmortal() == 0 && !map.getPlayer().isDestroyed()) {
-            map.getPlayer().destroy();
+            if (map.getPlayer().hasShield || map.getPlayer().isFlamePass) {
+                // =============================================================
+                // UC2.4c.2. Nếu nhân vật đang bất tử, hệ thống bỏ qua sát thương, nhân vật an toàn.
+                // =============================================================
+            } else {
+                // =============================================================
+                // UC2.4c.3. Nếu nhân vật không bất tử, hệ thống chuyển nhân vật sang trạng thái bị tiêu diệt, trừ mạng và kích hoạt luồng hồi sinh. Luồng di chuyển bị hủy bỏ.
+                // =============================================================
+                map.getPlayer().destroy();
+            }
         }
     }
 

@@ -1,6 +1,8 @@
 package entity.animateentity.character;
 
+import entity.Entity;
 import entity.animateentity.Bomb;
+import entity.animateentity.Brick;
 import entity.animateentity.character.enemy.Enemy;
 import entity.staticentity.*;
 import graphics.Sprite;
@@ -32,6 +34,22 @@ public class Bomber extends Character {
         this.defaultVel = 1;
         this.speed = 2;
         this.life = 3;
+    }
+
+    @Override
+    protected boolean canPass(Entity entity) {
+        // =============================================================
+        // UC2.4a.1. Nếu tại tọa độ tiếp theo có va chạm trực diện với vật cản cứng (Wall, Brick, Bomb),
+        // hệ thống kiểm tra cờ trạng thái xuyên thấu của nhân vật.
+        // UC2.4a.2. Nếu nhân vật có hiệu ứng Xuyên tường (WallPass) hoặc Xuyên Bom (BombPass)... hệ thống cho phép đi qua.
+        // =============================================================
+        if (entity instanceof Brick && this.passWall) {
+            return true;
+        }
+        if (entity instanceof Bomb && this.passBomb) {
+            return true;
+        }
+        return super.canPass(entity); // Nếu không có cờ, trả về false (Bị chặn lại)
     }
 
     private void initAnimation() {
@@ -149,6 +167,10 @@ public class Bomber extends Character {
         handleItemCollision();
         handleBombBlocking();
 
+        // =============================================================
+        // UC2.4a.3. Nếu nhân vật không có hiệu ứng, hệ thống chặn di chuyển.
+        // Hệ thống sẽ thử dịch chuyển nhân vật một khoảng nhỏ (Sliding sensitivity) để lách qua vật cản nếu lệch mép.
+        // =============================================================
         if (isCollision) {
             slidingSensivity();
         }
@@ -166,14 +188,21 @@ public class Bomber extends Character {
 
     private void handleEnemyCollision() {
         map.getEnemies().forEach(enemy -> {
-            // ====================================
-            // UC5.3a.1. Hệ thống phát hiện Bomber va chạm với quái vật hoặc lửa nổ.
-            // ====================================
+            // =============================================================
+            // UC2.4c.1. Nếu hệ thống phát hiện tọa độ đè lên Quái vật (Enemy) hoặc vùng Lửa nổ (Flame),
+            // hệ thống kiểm tra cờ trạng thái Bất tử (Invincible).
+            // =============================================================
             if (this.isCollider(enemy) && immortal == 0) {
-                //================================
-                // UC5.3 - Hệ thống kiểm tra trạng thái của Bomber
-                //================================
-                destroy();
+                if (hasShield || isFlamePass) {
+                    // =============================================================
+                    // UC2.4c.2. Nếu nhân vật đang bất tử, hệ thống bỏ qua sát thương, nhân vật an toàn.
+                    // =============================================================
+                } else {
+                    // =============================================================
+                    // UC2.4c.3. Nếu nhân vật không bất tử, hệ thống chuyển nhân vật sang trạng thái bị tiêu diệt, trừ mạng và kích hoạt luồng hồi sinh. Luồng di chuyển bị hủy bỏ.
+                    // =============================================================
+                    destroy();
+                }
             }
         });
     }
@@ -263,5 +292,31 @@ public class Bomber extends Character {
 
     public int getTimeRevival() {
         return timeRevival;
+    }
+
+    @Override
+    public void update() {
+        // =============================================================
+        // UC2.4b.4 (Bổ sung): Hệ thống đếm ngược thời gian hiệu lực của Vật phẩm và tự động gỡ bỏ buff khi hết hạn.
+        // =============================================================
+        if (passWallTimer > 0) {
+            passWallTimer--;
+            if (passWallTimer == 0) passWall = false;
+        }
+        if (passBombTimer > 0) {
+            passBombTimer--;
+            if (passBombTimer == 0) passBomb = false;
+        }
+        if (shieldTimer > 0) {
+            shieldTimer--;
+            if (shieldTimer == 0) hasShield = false;
+        }
+        if (flamePassTimer > 0) {
+            flamePassTimer--;
+            if (flamePassTimer == 0) isFlamePass = false;
+        }
+
+        // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
+        super.update();
     }
 }
