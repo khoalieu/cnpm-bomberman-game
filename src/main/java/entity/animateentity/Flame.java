@@ -62,6 +62,14 @@ public class Flame extends AnimateEntity {
                 entity.setSprite(Sprite.powerup_bombs);
             } else if (entity instanceof FlameItem) {
                 entity.setSprite(Sprite.powerup_flames);
+            } else if (entity instanceof WallPassItem) {
+                entity.setSprite(Sprite.powerup_wallpass);
+            } else if (entity instanceof BombPassItem) {
+                entity.setSprite(Sprite.powerup_bombpass);
+            } else if (entity instanceof FlamePassItem) {
+                entity.setSprite(Sprite.powerup_flamepass);
+            }else if (entity instanceof MysteryItem) {
+                entity.setSprite(Sprite.powerup_mystery);
             }
         } else if (entity instanceof Portal) {
             entity.setBlock(false);
