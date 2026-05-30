@@ -2,8 +2,7 @@ package entity.animateentity.character;
 
 import entity.animateentity.Bomb;
 import entity.animateentity.character.enemy.Enemy;
-import entity.staticentity.Grass;
-import entity.staticentity.SpeedItem;
+import entity.staticentity.*;
 import graphics.Sprite;
 import input.KeyInput;
 import sound.Sound;
@@ -15,6 +14,15 @@ import static variables.Variables.DIRECTION.*;
 public class Bomber extends Character {
     public KeyInput keyInput;
     private int timeRevival;
+
+    public boolean passWall = false;
+    public int passWallTimer = 0;
+    public boolean passBomb = false;
+    public int passBombTimer = 0;
+    public boolean hasShield = false;
+    public int shieldTimer = 0;
+    public boolean isFlamePass = false;
+    public int flamePassTimer = 0;
 
     public Bomber(int x, int y, Sprite sprite, KeyInput keyInput) {
         super(x, y, sprite);
@@ -155,32 +163,56 @@ public class Bomber extends Character {
     private void handleImmortalState() {
         if (immortal > 0) immortal--;
     }
+
     private void handleEnemyCollision() {
         map.getEnemies().forEach(enemy -> {
-        // ====================================
-        // UC5.3a.1. Hệ thống phát hiện Bomber va chạm với quái vật hoặc lửa nổ.
-        // ====================================
+            // ====================================
+            // UC5.3a.1. Hệ thống phát hiện Bomber va chạm với quái vật hoặc lửa nổ.
+            // ====================================
             if (this.isCollider(enemy) && immortal == 0) {
-        //================================
-        // UC5.3 - Hệ thống kiểm tra trạng thái của Bomber
-        //================================
+                //================================
+                // UC5.3 - Hệ thống kiểm tra trạng thái của Bomber
+                //================================
                 destroy();
             }
         });
     }
 
+    // =============================================================
+    //  UC2.4b - Tương tác với Vật phẩm (Item):
+    // =============================================================
     private void handleItemCollision() {
+        // =============================================================
+        // UC2.4b.1. Nếu tọa độ di chuyển đè lên một Vật phẩm (Item), hệ thống nhận diện loại vật phẩm.
+        // =============================================================
         map.getItems().forEach(item -> {
             if (this.isCollider(item)) {
-                Sound.get_item.play();
-                item.setActivated(true);
-
-                // Dòng này rất quan trọng để engine gỡ item khỏi bản đồ và tính điểm!
-                item.remove();
-
+                // =============================================================
+                // UC2.4b.2. Hệ thống áp dụng hiệu ứng buff (Tốc độ, Xuyên tường, Xuyên bom, Bất tử...)
+                // và kích hoạt bộ đếm thời gian (Timer) cho hiệu ứng đó.
+                // =============================================================
                 if (item instanceof SpeedItem) {
                     setSpeed(SpeedItem.increasedSpeed);
+                } else if (item instanceof WallPassItem) {
+                    passWall = true;
+                    passWallTimer = 600;
+                } else if (item instanceof BombPassItem) {
+                    passBomb = true;
+                    passBombTimer = 600;
+                } else if (item instanceof MysteryItem) {
+                    hasShield = true;
+                    shieldTimer = 600;
+                } else if (item instanceof FlamePassItem) {
+                    isFlamePass = true;
+                    flamePassTimer = 600;
                 }
+
+                // =============================================================
+                // UC2.4b.3. Hệ thống xóa vật phẩm khỏi bản đồ và phát âm thanh nhặt đồ. Nhân vật tiếp tục di chuyển.
+                // =============================================================
+                Sound.get_item.play();
+                item.setActivated(true);
+                item.remove();
                 item.delete();
             }
         });
@@ -213,8 +245,8 @@ public class Bomber extends Character {
     @Override
     public void delete() {
         // =====================================
-	    // UC5.3a - Bomber chết nhưng vẫn còn mạng hồi sinh
-	    // =====================================
+        // UC5.3a - Bomber chết nhưng vẫn còn mạng hồi sinh
+        // =====================================
         //UC5.3a.2. Hệ thống giảm số mạng hiện tại
         this.life--;
         timeRevival = 7;
@@ -229,5 +261,7 @@ public class Bomber extends Character {
         Sound.bomber_die.play();
     }
 
-    public int getTimeRevival() { return timeRevival; }
+    public int getTimeRevival() {
+        return timeRevival;
+    }
 }
