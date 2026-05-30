@@ -43,6 +43,10 @@ public abstract class Character extends AnimateEntity {
         immortal = 0;
     }
 
+    protected boolean canPass(Entity entity) {
+        return false; // Mặc định các nhân vật không thể đi xuyên vật cản
+    }
+
     public void setVelocity(int velocityX, int velocityY) {
         this.velocityX = velocityX;
         this.velocityY = velocityY;
@@ -84,23 +88,8 @@ public abstract class Character extends AnimateEntity {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 Entity entity = map.getTile(j, i);
-
-                // =============================================================
-                // UC2.4a.1. Nếu tại tọa độ tiếp theo có va chạm trực diện với vật cản cứng (Wall, Brick, Bomb),
-                // hệ thống kiểm tra cờ trạng thái xuyên thấu của nhân vật.
-                // =============================================================
                 if (entity.isBlock() && this.isCollider(entity)) {
-                    // =============================================================
-                    // UC2.4a.2. Nếu nhân vật có hiệu ứng Xuyên tường (WallPass) hoặc Xuyên Bom (BombPass) tương ứng với vật cản,
-                    // hệ thống cho phép đi qua bình thường và chuyển sang bước UC2.5.
-                    // =============================================================
-                    if (this instanceof Bomber && entity instanceof Brick && ((Bomber) this).passWall) {
-                        // Pass through, do nothing (Đi xuyên qua gạch)
-                    } else {
-                        // =============================================================
-                        // UC2.4a.3. Nếu nhân vật không có hiệu ứng, hệ thống chặn di chuyển.
-                        // Hệ thống sẽ thử dịch chuyển nhân vật một khoảng nhỏ (Sliding sensitivity) để lách qua vật cản nếu lệch mép.
-                        // =============================================================
+                    if (!canPass(entity)) {
                         isCollision = true;
                     }
                 }
@@ -119,14 +108,7 @@ public abstract class Character extends AnimateEntity {
         }
         map.getBombs().forEach(bomb -> {
             if (this.isCollider(bomb) && bomb.isBlock()) {
-                if (this instanceof Bomber && ((Bomber) this).passBomb) {
-                    // =====================================
-                    // UC2.4a.2: Pass through, do nothing (Đi xuyên qua bom)
-                    // =====================================
-                } else if (immortal == 0) {
-                    // =====================================
-                    // UC2.4a.3: Bị chặn lại
-                    // =====================================
+                if (!canPass(bomb) && immortal == 0) {
                     isCollision = true;
                 }
             }

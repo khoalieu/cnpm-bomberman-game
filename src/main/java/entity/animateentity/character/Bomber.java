@@ -1,6 +1,8 @@
 package entity.animateentity.character;
 
+import entity.Entity;
 import entity.animateentity.Bomb;
+import entity.animateentity.Brick;
 import entity.animateentity.character.enemy.Enemy;
 import entity.staticentity.*;
 import graphics.Sprite;
@@ -32,6 +34,22 @@ public class Bomber extends Character {
         this.defaultVel = 1;
         this.speed = 2;
         this.life = 3;
+    }
+
+    @Override
+    protected boolean canPass(Entity entity) {
+        // =============================================================
+        // UC2.4a.1. Nếu tại tọa độ tiếp theo có va chạm trực diện với vật cản cứng (Wall, Brick, Bomb),
+        // hệ thống kiểm tra cờ trạng thái xuyên thấu của nhân vật.
+        // UC2.4a.2. Nếu nhân vật có hiệu ứng Xuyên tường (WallPass) hoặc Xuyên Bom (BombPass)... hệ thống cho phép đi qua.
+        // =============================================================
+        if (entity instanceof Brick && this.passWall) {
+            return true;
+        }
+        if (entity instanceof Bomb && this.passBomb) {
+            return true;
+        }
+        return super.canPass(entity); // Nếu không có cờ, trả về false (Bị chặn lại)
     }
 
     private void initAnimation() {
@@ -149,6 +167,10 @@ public class Bomber extends Character {
         handleItemCollision();
         handleBombBlocking();
 
+        // =============================================================
+        // UC2.4a.3. Nếu nhân vật không có hiệu ứng, hệ thống chặn di chuyển.
+        // Hệ thống sẽ thử dịch chuyển nhân vật một khoảng nhỏ (Sliding sensitivity) để lách qua vật cản nếu lệch mép.
+        // =============================================================
         if (isCollision) {
             slidingSensivity();
         }
