@@ -40,7 +40,7 @@ f - Flame Item
 s - Speed Item
 w - WallPass Item (Mới)
 q - BombPass Item (Mới)
-m - Mystery Item (Mới)
+m - Mystery Item (Mới) - Mawjc dinh bat tu
 i - FlamePass Item (Mới)
 
 Kí tự khác các kí tự trên - Grass
