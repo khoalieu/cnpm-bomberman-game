@@ -12,6 +12,14 @@ public class StaticTexture {
                 return new FlameItem(j, i, Sprite.BRICK[0]);
             case 'b':
                 return new BombItem(j ,i, Sprite.BRICK[0]);
+            case 'w': // WallPassItem
+                return new WallPassItem(j, i, Sprite.BRICK[0]);
+            case 'q': // BombPassItem
+                return new BombPassItem(j, i, Sprite.BRICK[0]);
+            case 'm': // MysteryItem
+                return new MysteryItem(j, i, Sprite.BRICK[0]);
+            case 'i': // FlamePassItem
+                return new FlamePassItem(j, i, Sprite.BRICK[0]);
             case 'x':
                 return new Portal(j, i, Sprite.BRICK[0]);
             case '#':
