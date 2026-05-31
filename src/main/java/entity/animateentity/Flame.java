@@ -26,13 +26,17 @@ public class Flame extends AnimateEntity {
 
     @Override
     public void update() {
+        // ==============================
+        // UC3.8: Mỗi frame, hệ thống kiểm tra va chạm của tia lửa với tất cả các thực thể trên bản đồ.
+        // ==============================
         checkCollison();
         updateAnimation();
         updateDestroyAnimation();
     }
 
     // ==============================
-    // UC3.9: Vụ nổ kết thúc, hệ thống dọn dẹp các đối tượng Bom và Tia lửa khỏi bộ nhớ
+    // UC3.9: Vụ nổ kết thúc – hệ thống dọn dẹp các đối tượng Tia lửa (Flame) khỏi bộ nhớ.
+    //        timeDestroy đếm ngược mỗi frame; khi về 0, gọi delete() để xóa tia lửa.
     // ==============================
     @Override
     public void updateDestroyAnimation() {
@@ -46,31 +50,52 @@ public class Flame extends AnimateEntity {
     }
 
     // ==============================
-    // UC3.8: Hệ thống kiểm tra va chạm của tia lửa với các ô trên bản đồ
+    // UC3.8: Hệ thống kiểm tra va chạm của tia lửa với các ô trên bản đồ và xử lý tương tác phụ.
+    //        Hàm này được gọi từ Bomb.checkWallCollision() khi tia lửa chạm một ô không phải Grass.
     // ==============================
     public void interactWith(Entity entity) {
-        // ==============================
-        // UC3.8a.1. Nếu chạm Tường mềm (Brick): Hệ thống phá gạch, chặn tia lửa.
-        // ==============================
-        // (Lưu ý: Logic "chặn tia lửa" đã được xử lý bằng cờ false trong vòng lặp class Bomb. Tại đây chỉ xử lý "phá hủy gạch")
         if (entity instanceof Brick) {
+            // ==============================
+            // UC3.8a.1: [LUỒNG NGOẠI LỆ] Nếu chạm Tường mềm (Brick):
+            //   - Hệ thống phá gạch: gán cờ destroyed = true → Brick.update() sẽ phát hoạt ảnh nổ gạch.
+            //   - Logic "chặn tia lửa" được xử lý bằng cờ isPierce trong Bomb.checkWallCollision().
+            // ==============================
             ((Brick) entity).destroyed = true;
+
         } else if (entity instanceof Item) {
-            entity.setBlock(false);
-            if (entity instanceof SpeedItem) {
-                entity.setSprite(Sprite.powerup_speed);
-            } else if (entity instanceof BombItem) {
-                entity.setSprite(Sprite.powerup_bombs);
-            } else if (entity instanceof FlameItem) {
-                entity.setSprite(Sprite.powerup_flames);
-            } else if (entity instanceof WallPassItem) {
-                entity.setSprite(Sprite.powerup_wallpass);
-            } else if (entity instanceof BombPassItem) {
-                entity.setSprite(Sprite.powerup_bombpass);
-            } else if (entity instanceof FlamePassItem) {
-                entity.setSprite(Sprite.powerup_flamepass);
-            }else if (entity instanceof MysteryItem) {
-                entity.setSprite(Sprite.powerup_mystery);
+            if (!entity.isBlock()) {
+                // ==============================
+                // UC3.8a.5: [LUỒNG NGOẠI LỆ] Nếu chạm Vật phẩm đã lộ diện (Item với block = false):
+                //   Ở màn chơi số 1, nếu tia lửa chạm vào vật phẩm đang hiển thị bình thường trên bản đồ,
+                //   hệ thống thiêu rụi và xóa vĩnh viễn vật phẩm đó khỏi trò chơi.
+                // ==============================
+                destroyItemWhenBombExplodes(entity);
+            } else {
+                // ==============================
+                // UC3.8a.1 (tiếp): Nếu bên dưới viên gạch có ẩn chứa một Vật phẩm (Item với block = true),
+                //   hệ thống mở khóa (setBlock(false)) và hiển thị hình ảnh của vật phẩm đó lên bản đồ.
+                //   (VD: KickItem, PierceBombItem, SpeedItem, BombItem, FlameItem, ...)
+                // ==============================
+                entity.setBlock(false);
+                if (entity instanceof SpeedItem) {
+                    entity.setSprite(Sprite.powerup_speed);
+                } else if (entity instanceof BombItem) {
+                    entity.setSprite(Sprite.powerup_bombs);
+                } else if (entity instanceof FlameItem) {
+                    entity.setSprite(Sprite.powerup_flames);
+                } else if (entity instanceof WallPassItem) {
+                    entity.setSprite(Sprite.powerup_wallpass);
+                } else if (entity instanceof BombPassItem) {
+                    entity.setSprite(Sprite.powerup_bombpass);
+                } else if (entity instanceof FlamePassItem) {
+                    entity.setSprite(Sprite.powerup_flamepass);
+                } else if (entity instanceof MysteryItem) {
+                    entity.setSprite(Sprite.powerup_mystery);
+                } else if (entity instanceof KickItem) {
+                    entity.setSprite(Sprite.powerup_detonator); // Dùng tạm sprite detonator cho KickItem
+                } else if (entity instanceof PierceBombItem) {
+                    entity.setSprite(Sprite.powerup_piercebomb);
+                }
             }
         } else if (entity instanceof Portal) {
             entity.setBlock(false);
@@ -80,15 +105,18 @@ public class Flame extends AnimateEntity {
 
     public void checkCollison() {
         // ==============================
-        // UC3.8a.2. Nếu chạm Quái vật (Enemy): Hệ thống tiêu diệt quái vật.
+        // UC3.8a.2: [LUỒNG NGOẠI LỆ] Nếu tia lửa chạm Quái vật (Enemy):
+        //           Hệ thống tiêu diệt quái vật bằng cách gọi enemy.destroy().
         // ==============================
         map.getEnemies().forEach(enemy -> {
             if (this.isCollider(enemy)) {
                 enemy.destroy();
             }
         });
+
         // ==============================
-        // UC3.8a.3. Nếu chạm Người chơi (Player): Hệ thống trừ mạng người chơi
+        // UC3.8a.3: [LUỒNG NGOẠI LỆ] Nếu tia lửa chạm Người chơi (Player):
+        //           Hệ thống kiểm tra trạng thái miễn nhiễm trước khi trừ mạng.
         // ==============================
         // =============================================================
         // UC2.4c.1. Nếu hệ thống phát hiện tọa độ đè lên Quái vật (Enemy) hoặc vùng Lửa nổ (Flame),
@@ -101,7 +129,8 @@ public class Flame extends AnimateEntity {
                 // =============================================================
             } else {
                 // =============================================================
-                // UC2.4c.3. Nếu nhân vật không bất tử, hệ thống chuyển nhân vật sang trạng thái bị tiêu diệt, trừ mạng và kích hoạt luồng hồi sinh. Luồng di chuyển bị hủy bỏ.
+                // UC2.4c.3. Nếu nhân vật không bất tử, hệ thống chuyển nhân vật sang trạng thái
+                // bị tiêu diệt, trừ mạng và kích hoạt luồng hồi sinh. Luồng di chuyển bị hủy bỏ.
                 // =============================================================
                 map.getPlayer().destroy();
             }
@@ -110,10 +139,17 @@ public class Flame extends AnimateEntity {
 
     @Override
     public void delete() {
+        // ==============================
+        // UC3.9: Dọn dẹp đối tượng Tia lửa (Flame) khỏi danh sách quản lý bản đồ.
+        // ==============================
         this.remove();
     }
 
-    // Phương thức phá hủy vật phẩm khi bom nổ (được yêu cầu áp dụng thử ở màn 1, sau này sẽ dùng cho màn 2)
+    /**
+     * UC3.8a.5: [LUỒNG NGOẠI LỆ] Thiêu rụi vật phẩm đang hiển thị trên bản đồ.
+     * Ở màn chơi số 1: xóa vĩnh viễn vật phẩm đó khỏi trò chơi.
+     * (Được yêu cầu áp dụng thử ở màn 1, sau này sẽ dùng cho màn 2)
+     */
     public void destroyItemWhenBombExplodes(Entity entity) {
         if (Map.getLevelNumber() == 1) {
             entity.remove();

@@ -37,7 +37,9 @@ public class PlayerInput implements KeyInput {
                     case ("S"): return DOWN;
                     case ("A"): return LEFT;
                     // ==============================
-                    // UC3.1: Người chơi nhấn phím Space
+                    // UC3.1: Người chơi nhấn phím Space để đặt bom.
+                    // UC3.2: Hệ thống nhận và giải mã lệnh đặt bom từ người chơi –
+                    //        trả về hằng số PLACEBOMB để Bomber.setDirection() xử lý tiếp.
                     // ==============================
                     case ("SPACE"): return PLACEBOMB;
                 }

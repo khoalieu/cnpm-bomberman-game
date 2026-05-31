@@ -9,6 +9,7 @@ import graphics.Sprite;
 import input.KeyInput;
 import sound.Sound;
 import texture.BombTexture;
+import map.Map;
 
 import static graphics.Sprite.*;
 import static variables.Variables.DIRECTION.*;
@@ -25,6 +26,9 @@ public class Bomber extends Character {
     public int shieldTimer = 0;
     public boolean isFlamePass = false;
     public int flamePassTimer = 0;
+    public boolean hasKickAbility = false;
+    public boolean hasPierceBomb = false;
+    public int pierceBombTimer = 0;
 
     public Bomber(int x, int y, Sprite sprite, KeyInput keyInput) {
         super(x, y, sprite);
@@ -62,31 +66,42 @@ public class Bomber extends Character {
     }
 
     public void placeBombAt(int x, int y) {
+        // ==============================
+        // UC3.0: Tiền điều kiện – Trò chơi đang ở trạng thái hoạt động (Gameplay state)
+        // và nhân vật người chơi đang còn sống.
+        // (Hàm này chỉ được gọi khi game đang chạy và người chơi vẫn sống)
+        // ==============================
+
         // Giải mã tọa độ pixel sang tọa độ lưới (Grid)
         int bombX = Math.round((float) x / SCALED_SIZE);
         int bombY = Math.round((float) y / SCALED_SIZE);
 
         // ==============================
-        // UC3.3: Kiểm tra số lượng bom tối đa
+        // UC3.3: Hệ thống kiểm tra số lượng bom tối đa mà nhân vật được phép đặt.
         // ==============================
 
         // ==============================
-        // UC3.3a.1: Nếu số lượng bom người chơi đã đặt trên bản đồ đạt ngưỡng tối đa
+        // UC3.3a.1: [LUỒNG NGOẠI LỆ] Nếu số lượng bom người chơi đã đặt trên bản đồ
+        //           đạt ngưỡng tối đa (do chưa nổ hết).
+        // UC3.3a.2: Hệ thống bỏ qua lệnh đặt bom.
         // ==============================
         if (!isBombLimitAvailable()) {
-            return; // UC3.3a.2: Hệ thống bỏ qua lệnh
+            return; // Bỏ qua lệnh – vượt quá giới hạn bom
         }
 
         // ==============================
-        // UC3.4a.1: Kiểm tra vị trí hợp lệ (Vật cản, Bom khác, Enemy)
+        // UC3.4a.1: [LUỒNG NGOẠI LỆ] Kiểm tra vị trí hợp lệ –
+        //           Nếu tọa độ người chơi đang đứng đã có một vật thể khác
+        //           (Brick, Wall, Bom đã đặt, Enemy), hệ thống không cho phép đặt đè lên.
+        // UC3.4a.2: Hệ thống không cho phép đặt bom đè lên vật thể khác.
         // ==============================
         if (!isValidPlaceToSetBomb(bombX, bombY)) {
-            // UC3.4a.2: Hệ thống không cho phép đặt đè
-            return;
+            return; // Bỏ qua lệnh – vị trí không hợp lệ
         }
 
         // ==============================
-        // UC3.4: Khởi tạo và kích hoạt bom
+        // UC3.4: Hệ thống khởi tạo một đối tượng Bom tại tọa độ (x, y) lưới nơi
+        //        nhân vật đang đứng → gọi executePlaceBomb()
         // ==============================
         executePlaceBomb(bombX, bombY);
     }
@@ -111,8 +126,26 @@ public class Bomber extends Character {
     }
 
     private void executePlaceBomb(int bx, int by) {
+        // ==============================
+        // UC3.4 (tiếp): Hệ thống khởi tạo đối tượng Bom tại tọa độ lưới (bx, by).
+        // ==============================
         Bomb bomb = BombTexture.setBomb(bx, by);
+
+        // ==============================
+        // UC3.4 (tiếp): Nếu nhân vật đang trong thời gian hiệu lực của kỹ năng
+        // "Bom xuyên thấu" (PierceBombItem, hasPierceBomb == true),
+        // hệ thống gán thêm thuộc tính isPierce = true cho quả bom này.
+        // Quả bom xuyên thấu sẽ cho phép tia lửa xuyên qua Brick (Tường mềm).
+        // ==============================
+        bomb.isPierce = this.hasPierceBomb;
+
         map.getBombs().add(bomb);
+
+        // ==============================
+        // UC3.5: Hệ thống bắt đầu đếm ngược thời gian nổ.
+        // (Bộ đếm timetoExplode khởi tạo ngay bên trong constructor của Bomb,
+        //  và được giảm dần mỗi frame trong Bomb.update())
+        // ==============================
         Sound.place_bomb.play();
     }
 
@@ -121,7 +154,8 @@ public class Bomber extends Character {
     @Override
     public void setDirection() {
         // ==============================
-        //UC2.2 - UC3.2: Gán hướng đã giải mã vào thuộc tính direction của nhân vật
+        // UC2.2 - UC3.2: Hệ thống nhận và giải mã lệnh từ PlayerInput.handleKeyInput().
+        // Nếu người chơi nhấn Space, direction == PLACEBOMB → kích hoạt luồng đặt bom.
         // ==============================
         direction = keyInput.handleKeyInput();
         this.setVelocity(0, 0);
@@ -130,16 +164,19 @@ public class Bomber extends Character {
             // =============================================================
             // UC2.3: Hệ thống thiết lập vận tốc (Velocity) dựa trên hướng
             // =============================================================
-            case LEFT -> this.setVelocity(-defaultVel, 0);
+            case LEFT  -> this.setVelocity(-defaultVel, 0);
             case RIGHT -> this.setVelocity(defaultVel, 0);
-            case UP -> this.setVelocity(0, -defaultVel);
-            case DOWN -> this.setVelocity(0, defaultVel);
+            case UP    -> this.setVelocity(0, -defaultVel);
+            case DOWN  -> this.setVelocity(0, defaultVel);
+
             // ==============================
-            //UC3.2 (tiếp): Kich hoạt bom
+            // UC3.2 (tiếp): Hệ thống xử lý lệnh PLACEBOMB –
+            //               Gọi placeBombAt() để thực hiện luồng đặt bom.
+            //               Đặt lại direction = NONE ngay sau để tránh đặt bom liên tục khi giữ phím Space.
             // ==============================
             case PLACEBOMB -> {
                 placeBombAt(pixelX, pixelY);
-                direction = NONE; // Tránh việc đặt bom liên tục khi giữ phím
+                direction = NONE;
             }
         }
 
@@ -234,6 +271,19 @@ public class Bomber extends Character {
                 } else if (item instanceof FlamePassItem) {
                     isFlamePass = true;
                     flamePassTimer = 600;
+                } else if (item instanceof KickItem) {
+                    // ==============================
+                    // UC3.9a.2 (Điều kiện 1): Người chơi nhặt KickItem → kích hoạt cờ hasKickAbility = true.
+                    // Từ đây, khi húc vào bom sẽ đá bom trượt đi theo hướng di chuyển.
+                    // ==============================
+                    hasKickAbility = true;
+                } else if (item instanceof PierceBombItem) {
+                    // ==============================
+                    // UC3.4 (Điều kiện): Người chơi nhặt PierceBombItem → kích hoạt cờ hasPierceBomb = true.
+                    // Từ đây, mọi quả bom đặt ra sẽ mang thuộc tính "Xuyên thấu".
+                    // ==============================
+                    hasPierceBomb = true;
+                    pierceBombTimer = PierceBombItem.EFFECT_DURATION; // 20 giây = 1200 frame
                 }
 
                 // =============================================================
@@ -248,24 +298,53 @@ public class Bomber extends Character {
     }
 
     private void handleBombBlocking() {
+        // ==============================
+        // UC3.9a.1: Hệ thống phát hiện người chơi di chuyển và húc vào quả bom đang nằm trên bản đồ.
+        //           Tạm dịch chuyển nhân vật tới tọa độ tương lai để bắt chính xác va chạm khi đứng cạnh bom.
+        // ==============================
+        pixelX += velocityX;
+        pixelY += velocityY;
+
         map.getBombs().forEach(bomb -> {
             if (!this.isCollider(bomb)) {
+                // Bomber chưa chạm bom → kích hoạt tính năng chặn của bom cho lần sau
                 bomb.setBlock(true);
+            } else if (bomb.isBlock()) {
+                // ==============================
+                // UC3.9a: Bomber đang di chuyển và húc vào quả bom đang chặn.
+                // ==============================
+                // ==============================
+                // UC3.9a.2: [LUỒNG NGOẠI LỆ] Nếu người chơi đã sở hữu kỹ năng Đá bom (hasKickAbility == true)
+                //           VÀ đang ở màn chơi số 1,
+                //           hệ thống làm quả bom trượt đi theo hướng di chuyển của người chơi (bomb.kick()).
+                // ==============================
+                if (hasKickAbility && Map.getLevelNumber() == 1) {
+                    bomb.kick(this.direction);
+                }
+                // ==============================
+                // UC3.9a.3: [LUỒNG NGOẠI LỆ] Nếu không đủ điều kiện trên (không có KickItem hoặc không phải màn 1),
+                //           quả bom đóng vai trò vật cản vững chắc – nhân vật không thể đi xuyên qua.
+                //           (Va chạm do super.checkCollision() và isCollision đã xử lý)
+                // ==============================
             }
         });
+
+        // Trả lại tọa độ gốc sau khi kiểm tra
+        pixelX -= velocityX;
+        pixelY -= velocityY;
     }
 
     private void slidingSensivity() {
         // Chi tiết logic của UC2.4a.2: "Nắn" tọa độ nhân vật để lướt qua vật cản
         for (int i = -8 - speed; i <= 8 + speed; i++) {
             switch (direction) {
-                case UP, DOWN -> pixelX += i;
+                case UP, DOWN  -> pixelX += i;
                 case LEFT, RIGHT -> pixelY += i;
             }
             super.checkCollision();
             if (!isCollision) break;
             switch (direction) {
-                case UP, DOWN -> pixelX -= i;
+                case UP, DOWN  -> pixelX -= i;
                 case LEFT, RIGHT -> pixelY -= i;
             }
         }
@@ -314,6 +393,10 @@ public class Bomber extends Character {
         if (flamePassTimer > 0) {
             flamePassTimer--;
             if (flamePassTimer == 0) isFlamePass = false;
+        }
+        if (pierceBombTimer > 0) {
+            pierceBombTimer--;
+            if (pierceBombTimer == 0) hasPierceBomb = false; // Hết 20s, mất hiệu lực
         }
 
         // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
