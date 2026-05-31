@@ -1,6 +1,6 @@
 1 13 31
 ###############################
-#p w q m i * * * * * *         #
+#p w q m i k * * * * *         #
 # # # #*# # #*#*# # # #*#*#*# #
 #  x*     ***  *  4   *   * * #
 # # # # # #*# # #*#*# # # # #*#
@@ -42,5 +42,6 @@ w - WallPass Item (Mới)
 q - BombPass Item (Mới)
 m - Mystery Item (Mới) - Mawjc dinh bat tu
 i - FlamePass Item (Mới)
+k - Kick Item (Mới)
 
 Kí tự khác các kí tự trên - Grass

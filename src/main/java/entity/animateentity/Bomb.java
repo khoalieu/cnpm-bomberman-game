@@ -15,6 +15,11 @@ public class Bomb extends AnimateEntity {
     private boolean right = true;
     private boolean down = true;
     private int cnt = 0;
+    
+    private int velocityX = 0;
+    private int velocityY = 0;
+    private boolean isMoving = false;
+    private int speed = 2;
 
     public Bomb(int x, int y, Sprite sprite) {
         super(x, y, sprite);
@@ -25,6 +30,10 @@ public class Bomb extends AnimateEntity {
 
     @Override
     public void update() {
+        if (isMoving) {
+            moveAndCheckCollision();
+        }
+        
         // ==============================
         // UC3.5: Đếm ngược thời gian nổ của bom
         // ==============================
@@ -202,5 +211,67 @@ public class Bomb extends AnimateEntity {
     @Override
     public void delete() {
         this.remove();
+    }
+
+    public void kick(variables.Variables.DIRECTION direction) {
+        if (isMoving) return;
+        isMoving = true;
+        switch (direction) {
+            case LEFT -> { velocityX = -speed; velocityY = 0; }
+            case RIGHT -> { velocityX = speed; velocityY = 0; }
+            case UP -> { velocityX = 0; velocityY = -speed; }
+            case DOWN -> { velocityX = 0; velocityY = speed; }
+            default -> isMoving = false;
+        }
+    }
+
+    private void moveAndCheckCollision() {
+        pixelX += velocityX;
+        pixelY += velocityY;
+        
+        boolean collision = false;
+        
+        // Va chạm với gạch, tường
+        for (int i = 0; i < variables.Variables.HEIGHT; i++) {
+            for (int j = 0; j < variables.Variables.WIDTH; j++) {
+                entity.Entity e = map.getTile(j, i);
+                if (e.isBlock() && this.isCollider(e)) {
+                    collision = true;
+                }
+            }
+        }
+        
+        // Va chạm với bom khác
+        for (Bomb b : map.getBombs()) {
+            if (b != this && b.isBlock() && this.isCollider(b)) {
+                collision = true;
+            }
+        }
+        
+        // Va chạm với quái vật
+        for (entity.animateentity.character.enemy.Enemy enemy : map.getEnemies()) {
+            if (this.isCollider(enemy)) {
+                collision = true;
+            }
+        }
+        
+        if (collision) {
+            pixelX -= velocityX;
+            pixelY -= velocityY;
+            isMoving = false;
+            velocityX = 0;
+            velocityY = 0;
+            
+            // Căn giữa ô lưới
+            int gridX = Math.round((float) pixelX / graphics.Sprite.SCALED_SIZE);
+            int gridY = Math.round((float) pixelY / graphics.Sprite.SCALED_SIZE);
+            pixelX = gridX * graphics.Sprite.SCALED_SIZE;
+            pixelY = gridY * graphics.Sprite.SCALED_SIZE;
+            tileX = gridX;
+            tileY = gridY;
+        } else {
+            tileX = pixelX / graphics.Sprite.SCALED_SIZE;
+            tileY = pixelY / graphics.Sprite.SCALED_SIZE;
+        }
     }
 }

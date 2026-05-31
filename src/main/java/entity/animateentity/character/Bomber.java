@@ -9,6 +9,7 @@ import graphics.Sprite;
 import input.KeyInput;
 import sound.Sound;
 import texture.BombTexture;
+import map.Map;
 
 import static graphics.Sprite.*;
 import static variables.Variables.DIRECTION.*;
@@ -25,6 +26,7 @@ public class Bomber extends Character {
     public int shieldTimer = 0;
     public boolean isFlamePass = false;
     public int flamePassTimer = 0;
+    public boolean hasKickAbility = false;
 
     public Bomber(int x, int y, Sprite sprite, KeyInput keyInput) {
         super(x, y, sprite);
@@ -234,6 +236,8 @@ public class Bomber extends Character {
                 } else if (item instanceof FlamePassItem) {
                     isFlamePass = true;
                     flamePassTimer = 600;
+                } else if (item instanceof KickItem) {
+                    hasKickAbility = true;
                 }
 
                 // =============================================================
@@ -251,6 +255,11 @@ public class Bomber extends Character {
         map.getBombs().forEach(bomb -> {
             if (!this.isCollider(bomb)) {
                 bomb.setBlock(true);
+            } else if (bomb.isBlock()) {
+                // Bomber đang di chuyển húc vào quả bom đã chặn
+                if (hasKickAbility && Map.getLevelNumber() == 1) { // Chỉ áp dụng ở màn 1 theo yêu cầu test hiện tại
+                    bomb.kick(this.direction);
+                }
             }
         });
     }

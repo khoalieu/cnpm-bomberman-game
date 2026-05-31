@@ -74,6 +74,8 @@ public class Flame extends AnimateEntity {
                     entity.setSprite(Sprite.powerup_flamepass);
                 } else if (entity instanceof MysteryItem) {
                     entity.setSprite(Sprite.powerup_mystery);
+                } else if (entity instanceof KickItem) {
+                    entity.setSprite(Sprite.powerup_detonator); // Dùng tạm sprite detonator cho KickItem
                 }
             }
         } else if (entity instanceof Portal) {
