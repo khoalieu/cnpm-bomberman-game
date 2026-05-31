@@ -252,6 +252,10 @@ public class Bomber extends Character {
     }
 
     private void handleBombBlocking() {
+        // Tạm dịch chuyển nhân vật tới tọa độ tương lai để bắt chính xác va chạm khi đứng cạnh bom
+        pixelX += velocityX;
+        pixelY += velocityY;
+        
         map.getBombs().forEach(bomb -> {
             if (!this.isCollider(bomb)) {
                 bomb.setBlock(true);
@@ -262,6 +266,10 @@ public class Bomber extends Character {
                 }
             }
         });
+        
+        // Trả lại tọa độ
+        pixelX -= velocityX;
+        pixelY -= velocityY;
     }
 
     private void slidingSensivity() {
