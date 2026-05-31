@@ -56,21 +56,25 @@ public class Flame extends AnimateEntity {
         if (entity instanceof Brick) {
             ((Brick) entity).destroyed = true;
         } else if (entity instanceof Item) {
-            entity.setBlock(false);
-            if (entity instanceof SpeedItem) {
-                entity.setSprite(Sprite.powerup_speed);
-            } else if (entity instanceof BombItem) {
-                entity.setSprite(Sprite.powerup_bombs);
-            } else if (entity instanceof FlameItem) {
-                entity.setSprite(Sprite.powerup_flames);
-            } else if (entity instanceof WallPassItem) {
-                entity.setSprite(Sprite.powerup_wallpass);
-            } else if (entity instanceof BombPassItem) {
-                entity.setSprite(Sprite.powerup_bombpass);
-            } else if (entity instanceof FlamePassItem) {
-                entity.setSprite(Sprite.powerup_flamepass);
-            }else if (entity instanceof MysteryItem) {
-                entity.setSprite(Sprite.powerup_mystery);
+            if (!entity.isBlock()) {
+                destroyItemWhenBombExplodes(entity);
+            } else {
+                entity.setBlock(false);
+                if (entity instanceof SpeedItem) {
+                    entity.setSprite(Sprite.powerup_speed);
+                } else if (entity instanceof BombItem) {
+                    entity.setSprite(Sprite.powerup_bombs);
+                } else if (entity instanceof FlameItem) {
+                    entity.setSprite(Sprite.powerup_flames);
+                } else if (entity instanceof WallPassItem) {
+                    entity.setSprite(Sprite.powerup_wallpass);
+                } else if (entity instanceof BombPassItem) {
+                    entity.setSprite(Sprite.powerup_bombpass);
+                } else if (entity instanceof FlamePassItem) {
+                    entity.setSprite(Sprite.powerup_flamepass);
+                } else if (entity instanceof MysteryItem) {
+                    entity.setSprite(Sprite.powerup_mystery);
+                }
             }
         } else if (entity instanceof Portal) {
             entity.setBlock(false);
