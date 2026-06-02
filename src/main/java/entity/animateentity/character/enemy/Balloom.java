@@ -73,6 +73,6 @@ public class Balloom extends Enemy {
         // =============================================================
         // UC4.5a.3: Quái vật bị tia lửa tiêu diệt, thực thể bị xóa khỏi bộ nhớ
         // =============================================================
-        this.remove();
+      super.delete();
     }
 }

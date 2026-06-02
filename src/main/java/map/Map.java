@@ -48,6 +48,8 @@ public class Map {
     private boolean revival;
     private int renderX;
     private int renderY;
+    //uc4+
+    private boolean lastEnemyEnragedTriggered = false;
 
     public static Map getGameMap() {
         if (map == null) {
@@ -85,6 +87,8 @@ public class Map {
         levelNumber = _string.charAt(0) - '0';
         resetEntities();
         revival = false;
+        //uc4+
+        lastEnemyEnragedTriggered = false;
         // [UC1.4]: Vòng lặp duyệt từng dòng (i) và từng ký tự (j) trong ma trận
         for (int i = 0; i < HEIGHT; i++) {
             String string = scanner.nextLine();
@@ -182,8 +186,20 @@ public class Map {
             scores.remove(score);
         });
     }
+    //uc4+
+        private void triggerLastEnemyEnragedIfNeeded() {
+        if (lastEnemyEnragedTriggered) return;
 
+        if (enemies.size() == 1) {
+            Enemy lastEnemy = enemies.get(0);
 
+            if (!lastEnemy.isDestroyed() && !lastEnemy.isRemoved()) {
+                lastEnemy.becomeEnraged();
+                lastEnemyEnragedTriggered = true;
+            }
+        }
+    }
+    
     public void updateMap() {
         if (revival) return;
         for (int i = 0; i < HEIGHT; i++) {
@@ -208,6 +224,7 @@ public class Map {
             score.update();
         });
         removeEntities();
+        triggerLastEnemyEnragedIfNeeded();
     }
 
     public void renderTopInfo(GraphicsContext graphicsContext) {

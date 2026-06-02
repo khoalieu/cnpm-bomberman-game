@@ -10,7 +10,6 @@ import variables.Variables.DIRECTION;
 
 import static graphics.Sprite.*;
 import static variables.Variables.DIRECTION.*;
-import static variables.Variables.DIRECTION.RIGHT;
 import static variables.Variables.HEIGHT;
 import static variables.Variables.WIDTH;
 
@@ -110,6 +109,6 @@ public class Kondoria extends Enemy {
         // =============================================================
         // UC4.5a.3: Quái vật bị tiêu diệt, xóa thực thể khỏi bộ nhớ hệ thống
         // =============================================================
-        this.remove();
+        super.delete();
     }
 }

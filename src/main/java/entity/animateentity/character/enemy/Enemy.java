@@ -4,6 +4,8 @@ import entity.animateentity.character.Bomber;
 import entity.animateentity.character.Character;
 import graphics.Sprite;
 import map.Map;
+import variables.Variables.DIRECTION;
+import graphics.Sprite;// uc4+
 
 import static variables.Variables.*;
 
@@ -17,6 +19,11 @@ public abstract class Enemy extends Character {
     protected int changeSpeed;
     protected int defaultCntMove;
     protected int defaultChangeSpeed;
+    //uc4+
+    protected boolean enraged = false;
+    protected java.util.HashMap<Enum, Sprite[]> normalAnimation = new java.util.HashMap<>();
+    protected java.util.HashMap<Enum, Sprite[]> enragedAnimation = new java.util.HashMap<>();
+    
 
     public Enemy(int x, int y, Sprite sprite) {
         super(x, y, sprite);
@@ -38,6 +45,55 @@ public abstract class Enemy extends Character {
     public void setChangeSpeed(int changeSpeed) {
 
         this.changeSpeed = changeSpeed;
+    }
+
+    //uc4+
+    public boolean isEnraged() {
+     return enraged;
+    }
+
+    protected void prepareEnragedAnimation() {
+        normalAnimation.clear();
+        enragedAnimation.clear();
+
+        for (Enum key : animation.keySet()) {
+            Sprite[] normalSprites = animation.get(key);
+
+            normalAnimation.put(key, normalSprites);
+
+            if (key == DIRECTION.DESTROYED) {
+                enragedAnimation.put(key, normalSprites);
+            } else {
+                enragedAnimation.put(key, Sprite.createEnragedAnimation(normalSprites));
+            }
+        }
+    }
+
+    public void becomeEnraged() {
+        if (enraged || isDestroyed() || isRemoved()) return;
+
+        prepareEnragedAnimation();
+
+        enraged = true;
+
+        // Tăng mạng lên ít nhất 3.
+        this.life = Math.max(this.life, 3);
+
+        // Tăng tốc an toàn.
+        // Không tăng defaultVel để tránh lỗi đi xuyên tile/collision.
+        this.speed += 1;
+
+        useEnragedAnimation();
+    }
+
+    protected void useEnragedAnimation() {
+        for (Enum key : enragedAnimation.keySet()) {
+            animation.put(key, enragedAnimation.get(key));
+        }
+
+        if (animation.containsKey(direction)) {
+            currentAnimate = animation.get(direction);
+        }
     }
 
     /*
@@ -81,4 +137,24 @@ public abstract class Enemy extends Character {
             currentAnimate = animation.get(direction);
         }
     }
+    @Override
+    public void delete() {
+    if (enraged) {
+        life--;
+
+        if (life <= 0) {
+            this.remove();
+        } else {
+            destroyed = false;
+
+            if (animation.containsKey(direction)) {
+                currentAnimate = animation.get(direction);
+            }
+        }
+
+        return;
+    }
+
+    this.remove();
+}
 }
