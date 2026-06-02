@@ -63,6 +63,6 @@ public class Oneal extends Enemy{
         // =============================================================
         // UC4.5a.3: Thực thể quái vật bị xóa khỏi bộ nhớ sau khi bị tiêu diệt
         // =============================================================
-        this.remove();
+       super.delete();
     }
 }

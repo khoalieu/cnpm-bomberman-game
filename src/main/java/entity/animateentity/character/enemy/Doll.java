@@ -66,12 +66,14 @@ public class Doll extends Enemy {
         // =============================================================
 
         // UC4.5a.2: Giảm mạng và chuẩn bị thực hiện hoạt ảnh nổ/chết
-        life --;
-        destroyed = false; // Reset trạng thái chờ để thực hiện animation chết
+        // life --;
+        // destroyed = false; // Reset trạng thái chờ để thực hiện animation chết
 
-        if (life == 0) {
-            // UC4.5a.3: Thực thể bị xóa khỏi bộ nhớ (Map) khi hết mạng
-            this.remove();
-        }
+        // if (life == 0) {
+        //     // UC4.5a.3: Thực thể bị xóa khỏi bộ nhớ (Map) khi hết mạng
+        //     this.remove();
+        // } 
+        //uc4+
+      super.delete();
     }
 }

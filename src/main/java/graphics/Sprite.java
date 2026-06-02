@@ -356,4 +356,46 @@ public class Sprite {
         return _realHeight;
     }
 
+    // =============================================================
+    public Sprite createEnragedSprite() {
+    Sprite result = new Sprite(this.SIZE, TRANSPARENT_COLOR);
+
+    result._realWidth = this._realWidth;
+    result._realHeight = this._realHeight;
+
+    for (int i = 0; i < this._pixels.length; i++) {
+        int argb = this._pixels[i];
+
+        if (argb == TRANSPARENT_COLOR) {
+            result._pixels[i] = TRANSPARENT_COLOR;
+            continue;
+        }
+
+        int alpha = (argb >> 24) & 0xff;
+        int red = (argb >> 16) & 0xff;
+        int green = (argb >> 8) & 0xff;
+        int blue = argb & 0xff;
+
+        // Hiệu ứng tức giận / siêu saiyan:
+        // tăng đỏ + xanh lá, giảm xanh dương để ngả vàng/cam.
+        red = Math.min(255, red + 90);
+        green = Math.min(255, green + 60);
+        blue = Math.max(0, blue - 40);
+
+        result._pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
+    }
+
+    return result;
+}
+
+public static Sprite[] createEnragedAnimation(Sprite[] normalAnimation) {
+    Sprite[] enragedAnimation = new Sprite[normalAnimation.length];
+
+    for (int i = 0; i < normalAnimation.length; i++) {
+        enragedAnimation[i] = normalAnimation[i].createEnragedSprite();
+    }
+
+    return enragedAnimation;
+}
+
 }
