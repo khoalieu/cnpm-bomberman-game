@@ -19,6 +19,12 @@ public class Brick extends AnimateEntity {
 
     @Override
     public void update() {
+        // ==============================
+        // UC3.8a.1: [LUỒNG NGOẠI LỆ] Nếu tia lửa chạm Tường mềm (Brick):
+        //   Cờ destroyed được gán = true bởi Flame.interactWith() khi tia lửa chạm vào.
+        //   Tại đây, hệ thống kích hoạt hoạt ảnh phá gạch (EXPLODING) và đếm ngược timeDestroy.
+        //   Khi timeDestroy về 0, gọi delete() để xóa Brick khỏi bản đồ.
+        // ==============================
         if (destroyed == true) {
             currentAnimate = animation.get(EXPLODING);
             if (timeDestroy > 0) {
@@ -36,6 +42,7 @@ public class Brick extends AnimateEntity {
     @Override
     public void updateAnimation() {
     }
+
     @Override
     public void updateDestroyAnimation() {
         long time = MainGame.time;
@@ -45,6 +52,14 @@ public class Brick extends AnimateEntity {
 
     @Override
     public void delete() {
+        // ==============================
+        // UC3.8a.1 (tiếp): Hoàn tất phá gạch –
+        //   Hệ thống thay thế ô Brick bằng ô Grass trống trên bản đồ.
+        //   Nếu bên dưới Brick có Item ẩn (block = true), Item đó đã được mở khóa và hiển thị
+        //   bởi Flame.interactWith() trước đó.
+        //   Logic "chặn tia lửa" (dừng lan truyền hướng đó) được xử lý bởi
+        //   Bomb.checkWallCollision() thông qua cờ isPierce.
+        // ==============================
         map.setTile(this.tileY, this.tileX, new Grass(this.tileX, this.tileY, Sprite.grass));
     }
 }
