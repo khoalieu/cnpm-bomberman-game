@@ -12,6 +12,12 @@ public class MenuInput implements KeyInput {
         keyInput.put("W", false);
         keyInput.put("S", false);
         keyInput.put("ENTER", false);
+
+        // =============================================================
+        // UC5.11a & UC5.12a: Đảm bảo phím P, M không bị kẹt khi vào Menu
+        // =============================================================
+        keyInput.put("P", false);
+        keyInput.put("M", false);
     }
 
     @Override
