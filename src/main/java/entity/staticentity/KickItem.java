@@ -8,9 +8,9 @@ public class KickItem extends Item {
     
     static {
         try {
-            customImage = new Image(KickItem.class.getResourceAsStream("/sprites/kickboom_item.png"), Sprite.SCALED_SIZE, Sprite.SCALED_SIZE, true, true);
+            customImage = new Image(KickItem.class.getResourceAsStream("/sprites/powerup_kickbomitem.png"), Sprite.SCALED_SIZE, Sprite.SCALED_SIZE, true, true);
         } catch (Exception e) {
-            System.err.println("Cannot load /sprites/kickboom_item.png: " + e.getMessage());
+            System.err.println("Cannot load /sprites/powerup_kickbomitem.png: " + e.getMessage());
             customImage = null;
         }
     }

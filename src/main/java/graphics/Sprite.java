@@ -290,6 +290,7 @@ public class Sprite {
     public static Sprite powerup_flamepass = new Sprite(DEFAULT_SIZE, 6, 10, SpriteSheet.tiles, 16, 16);
     public static Sprite powerup_mystery = new Sprite(DEFAULT_SIZE, 7, 10, SpriteSheet.tiles, 16, 16);
     public static Sprite powerup_kick = new Sprite(DEFAULT_SIZE, 2, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item đá bom
+    public static Sprite powerup_piercebomb = new Sprite(DEFAULT_SIZE, 3, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item bom xuyên thấu
     /*
     |--------------------------------------------------------------------------
     | Scores

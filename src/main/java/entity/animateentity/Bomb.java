@@ -20,6 +20,8 @@ public class Bomb extends AnimateEntity {
     private int velocityY = 0;
     private boolean isMoving = false;
     private int speed = 2;
+    /** Cờ Bom Xuyên Thấu: nếu true, tia lửa xuyên qua Brick (gạch mềm) nhưng vẫn bị Wall (tường cứng) chặn */
+    public boolean isPierce = false;
 
     public Bomb(int x, int y, Sprite sprite) {
         super(x, y, sprite);
@@ -159,21 +161,40 @@ public class Bomb extends AnimateEntity {
     }
 
     /**
-     * UC3.7a.1: Nếu ô tiếp theo chứa vật cản (Wall/Brick), gọi hàm tương tác và ngừng lan truyền
+     * UC3.7a.1: Nếu ô tiếp theo chứa vật cản (Wall/Brick), gọi hàm tương tác và ngừng lan truyền.
+     * Nếu bom có cờ isPierce = true, tia lửa sẽ xuyên qua Brick nhưng vẫn bị chặn bởi Wall.
      */
     private void checkWallCollision(int x, int y, String dir, Flame centerFlame) {
-        if (!(map.getTile(x, y) instanceof Grass)) {
-            centerFlame.interactWith(map.getTile(x, y));
-            // Nếu ô không biến thành Grass sau khi tương tác (ví dụ như gạch chưa vỡ hẳn, hoặc tường) thì chặn lại
-            // Ngược lại, nếu thành Grass (item bị phá hủy) thì cho xuyên qua
-            if (!(map.getTile(x, y) instanceof Grass)) {
-                switch (dir) {
-                    case "down" -> down = false;
-                    case "up" -> up = false;
-                    case "right" -> right = false;
-                    case "left" -> left = false;
-                }
+        entity.Entity tile = map.getTile(x, y);
+        if (tile instanceof Grass) return; // Ô trống, không cần kiểm tra
+
+        // Gọi tương tác (phá Brick, lộ item,...)
+        centerFlame.interactWith(tile);
+
+        if (tile instanceof entity.staticentity.Wall) {
+            // Tường cứng: LUÔN chặn lại dù là bom thường hay bom xuyên thấu
+            stopFlame(dir);
+        } else if (tile instanceof entity.animateentity.Brick) {
+            // Gạch mềm: chỉ chặn nếu KHÔNG phải bom xuyên thấu
+            if (!this.isPierce) {
+                stopFlame(dir);
             }
+            // isPierce == true: tia lửa tiếp tục xuyên qua gạch đã bị phá
+        } else {
+            // Các vật cản khác (bom khác, v.v.): chặn lại
+            stopFlame(dir);
+        }
+    }
+
+    /**
+     * Ngừng lan truyền tia lửa theo hướng chỉ định.
+     */
+    private void stopFlame(String dir) {
+        switch (dir) {
+            case "down"  -> down  = false;
+            case "up"    -> up    = false;
+            case "right" -> right = false;
+            case "left"  -> left  = false;
         }
     }
 

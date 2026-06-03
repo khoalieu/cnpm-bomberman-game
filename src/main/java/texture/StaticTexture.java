@@ -22,6 +22,8 @@ public class StaticTexture {
                 return new FlamePassItem(j, i, Sprite.BRICK[0]);
             case 'k': // KickItem
                 return new KickItem(j, i, Sprite.BRICK[0]);
+            case 'c': // PierceBombItem (Pierce/Xuyên thấu)
+                return new PierceBombItem(j, i, Sprite.BRICK[0]);
             case 'x':
                 return new Portal(j, i, Sprite.BRICK[0]);
             case '#':

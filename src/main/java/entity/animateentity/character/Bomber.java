@@ -27,6 +27,8 @@ public class Bomber extends Character {
     public boolean isFlamePass = false;
     public int flamePassTimer = 0;
     public boolean hasKickAbility = false;
+    public boolean hasPierceBomb = false;
+    public int pierceBombTimer = 0;
 
     public Bomber(int x, int y, Sprite sprite, KeyInput keyInput) {
         super(x, y, sprite);
@@ -114,6 +116,7 @@ public class Bomber extends Character {
 
     private void executePlaceBomb(int bx, int by) {
         Bomb bomb = BombTexture.setBomb(bx, by);
+        bomb.isPierce = this.hasPierceBomb; // Truyền cờ xuyên thấu vào quả bom vừa đặt
         map.getBombs().add(bomb);
         Sound.place_bomb.play();
     }
@@ -238,6 +241,9 @@ public class Bomber extends Character {
                     flamePassTimer = 600;
                 } else if (item instanceof KickItem) {
                     hasKickAbility = true;
+                } else if (item instanceof PierceBombItem) {
+                    hasPierceBomb = true;
+                    pierceBombTimer = PierceBombItem.EFFECT_DURATION; // 20 giây = 1200 frame
                 }
 
                 // =============================================================
@@ -331,6 +337,10 @@ public class Bomber extends Character {
         if (flamePassTimer > 0) {
             flamePassTimer--;
             if (flamePassTimer == 0) isFlamePass = false;
+        }
+        if (pierceBombTimer > 0) {
+            pierceBombTimer--;
+            if (pierceBombTimer == 0) hasPierceBomb = false; // Hết 20s, mất hiệu lực
         }
 
         // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
