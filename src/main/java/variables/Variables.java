@@ -41,7 +41,7 @@ public class Variables {
     public static final String ICON_PATH = "/icon.png";
     // [UC1.2 - Bước 1.5]: Lấy đường dẫn map lưu trữ tệp cấu hình (Level1.txt)
     public static final String[] MAP_URLS = {
-           Variables.class.getResource("/levels/Level1.txt").getPath(),
+           Variables.class.getResource("/levels/Level2.txt").getPath(),
     };
 
     public static final String[] FONT_URLS = {

@@ -104,16 +104,30 @@ public class MainGame extends Application {
                 if (!choseStart || backToMenu) {
                     menu.setStart(false);
                     menu.renderMenu(gameMenuContext);
+
                     if(menu.isStart() || countdown != 160) {
-                        if(countdown == 160) Sound.level_start.play();
+                        if (countdown == 160) {
+                            Sound.level_start.play();
+                            try {
+                                map.createMap(MAP_URLS[0]); // Đọc Level2.txt từ chỉ mục 0
+                                map.resetNumber();
+                            } catch (FileNotFoundException e) {
+                                System.out.println(e);
+                            }
+                        }
+
                         countdown--;
                         menu.renderMessage('s', gameMenuContext);
                     }
+
                     if (countdown == 0) {
-                        countdown = 160; backToMenu = false; choseStart = true;
-                        Sound.stage_sound.play(); Sound.stage_sound.loop();
+                        countdown = 160;
+                        backToMenu = false;
+                        choseStart = true;
+                        Sound.stage_sound.play();
+                        Sound.stage_sound.loop();
                         stage.setScene(scene);
-                        try { map.createMap(MAP_URLS[0]); map.resetNumber(); } catch (FileNotFoundException e) { System.out.println(e); }
+                        // Lệnh khởi tạo map cũ tại đây đã được gỡ bỏ để tránh lỗi hiển thị trễ dữ liệu
                     }
                 } else {
                     if (now - lastFrame >= timePerFrame) {
@@ -121,28 +135,34 @@ public class MainGame extends Application {
                         map.updateMap();
                         map.renderMap(graphicsContext);
                         map.renderTopInfo(topInfoContext);
-                        if((backToMenu && !win) || (countdown != 160 && !win)) {
-                            if(countdown == 160) { Sound.game_over.play(); stage.setScene(scene2); }
+
+                        if ((backToMenu && !win) || (countdown != 160 && !win)) {
+                            if (countdown == 160) { Sound.game_over.play(); stage.setScene(scene2); }
                             backToMenu = false; menu.renderMessage('o', gameMenuContext); countdown--;
                         }
-                        if((backToMenu && win) || (countdown != 160 && win)) {
-                            if(countdown == 160) { Sound.level_complete.play(); stage.setScene(scene2); }
+                        if ((backToMenu && win) || (countdown != 160 && win)) {
+                            if (countdown == 160) { Sound.level_complete.play(); stage.setScene(scene2); }
                             backToMenu = false; menu.renderMessage('c', gameMenuContext); countdown--;
                         }
-                        // ==============================
-                        // UC5.1a - Hết thời gian chơi
-                            //UC5.1a.1	Bộ đếm thời gian giảm về 0.
+
+                        // =========================================================
+                        // UC5.1a - Hết thời gian chơi (Bộ đếm thời gian giảm về 0)
+                        // =========================================================
                         if (countdown == 0) {
-                            countdown = 160; choseStart = false;
-                            Sound.stage_sound.stop(); Sound.menu_sound.play();
-                            backToMenu = true; win = false;
+                            countdown = 160;
+                            choseStart = false;
+                            Sound.stage_sound.stop();
+                            Sound.menu_sound.play();
+                            backToMenu = true;
+                            win = false;
                         }
                     }
                 }
                 frames++;
                 if (currentTime - startTime - lastTime >= 1000000000) {
                     stage.setTitle(GAME_TITLE + " | " + frames + " FPS");
-                    frames = 0; lastTime = currentTime - startTime;
+                    frames = 0;
+                    lastTime = currentTime - startTime;
                 }
                 time = (currentTime - startTime) / 60000000 + 1;
             }
