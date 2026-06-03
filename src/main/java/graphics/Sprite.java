@@ -247,6 +247,8 @@ public class Sprite {
         public static Sprite powerup_bombpass = new Sprite(DEFAULT_SIZE, 5, 10, SpriteSheet.tiles, 16, 16);
         public static Sprite powerup_flamepass = new Sprite(DEFAULT_SIZE, 6, 10, SpriteSheet.tiles, 16, 16);
         public static Sprite powerup_mystery = new Sprite(DEFAULT_SIZE, 7, 10, SpriteSheet.tiles, 16, 16);
+        public static Sprite powerup_kick = new Sprite(DEFAULT_SIZE, 2, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item đá bom
+        public static Sprite powerup_piercebomb = new Sprite(DEFAULT_SIZE, 3, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item bom xuyên thấu
         /*
          * |--------------------------------------------------------------------------
          * | Scores
@@ -261,49 +263,16 @@ public class Sprite {
         public static Sprite pass_score = new Sprite(DEFAULT_SIZE, 14, 10, SpriteSheet.tiles, 16, 16);
         public static Sprite pontan_score = new Sprite(DEFAULT_SIZE, 15, 10, SpriteSheet.tiles, 16, 16);
 
-    public static Sprite[] EXPLOSION_VERTICAL_DOWN_LAST = {
-            new Sprite(DEFAULT_SIZE, 1, 6, SpriteSheet.tiles, 16, 16),
-            new Sprite(DEFAULT_SIZE, 2, 6, SpriteSheet.tiles, 16, 16),
-            new Sprite(DEFAULT_SIZE, 3, 6, SpriteSheet.tiles, 16, 16),
-    };
-    /*
-    |--------------------------------------------------------------------------
-    | Brick FlameSegment
-    |--------------------------------------------------------------------------
-     */
-    public static Sprite[] BRICK_EXPLODED = {
-            new Sprite(DEFAULT_SIZE, 7, 1, SpriteSheet.tiles, 16, 16),
-            new Sprite(DEFAULT_SIZE, 7, 2, SpriteSheet.tiles, 16, 16),
-            new Sprite(DEFAULT_SIZE, 7, 3, SpriteSheet.tiles, 16, 16),
-    };
-    /*
-    |--------------------------------------------------------------------------
-    | Powerups
-    |--------------------------------------------------------------------------
-     */
-    public static Sprite powerup_bombs = new Sprite(DEFAULT_SIZE, 0, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_flames = new Sprite(DEFAULT_SIZE, 1, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_speed = new Sprite(DEFAULT_SIZE, 2, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_wallpass = new Sprite(DEFAULT_SIZE, 3, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_detonator = new Sprite(DEFAULT_SIZE, 4, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_bombpass = new Sprite(DEFAULT_SIZE, 5, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_flamepass = new Sprite(DEFAULT_SIZE, 6, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_mystery = new Sprite(DEFAULT_SIZE, 7, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite powerup_kick = new Sprite(DEFAULT_SIZE, 2, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item đá bom
-    public static Sprite powerup_piercebomb = new Sprite(DEFAULT_SIZE, 3, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item bom xuyên thấu
-    /*
-    |--------------------------------------------------------------------------
-    | Scores
-    |--------------------------------------------------------------------------
-     */
-    public static Sprite balloom_score = new Sprite(DEFAULT_SIZE, 8, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite oneal_score = new Sprite(DEFAULT_SIZE, 9, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite doll_score = new Sprite(DEFAULT_SIZE, 10, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite minvo_score = new Sprite(DEFAULT_SIZE, 11, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite kondoria_score = new Sprite(DEFAULT_SIZE, 12, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite ovapi_score = new Sprite(DEFAULT_SIZE, 13, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite pass_score = new Sprite(DEFAULT_SIZE, 14, 10, SpriteSheet.tiles, 16, 16);
-    public static Sprite pontan_score = new Sprite(DEFAULT_SIZE, 15, 10, SpriteSheet.tiles, 16, 16);
+        public Sprite(int size, int x, int y, SpriteSheet sheet, int rw, int rh) {
+                SIZE = size;
+                _pixels = new int[SIZE * SIZE];
+                _x = x * SIZE;
+                _y = y * SIZE;
+                _sheet = sheet;
+                _realWidth = rw * 2;
+                _realHeight = rh * 2;
+                load();
+        }
 
         public Sprite(int size, int color) {
                 SIZE = size;
