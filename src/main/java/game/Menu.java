@@ -6,6 +6,8 @@ import variables.Variables.DIRECTION;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import input.KeyInput;
 
 import java.io.File;
@@ -72,15 +74,35 @@ public class Menu {
         }
     }
 
+    // =====================================
+    // UC5.11a - Render Menu Tạm dừng (Mới)
+    // =====================================
+    public void renderPauseMenu(GraphicsContext graphicsContext) {
+        // Vẽ lớp phủ làm mờ nền
+        graphicsContext.setFill(Color.rgb(0, 0, 0, 0.5));
+        graphicsContext.fillRect(0, 0, graphicsContext.getCanvas().getWidth(), graphicsContext.getCanvas().getHeight());
+
+        // Thiết lập giao diện chữ
+        graphicsContext.setFill(Color.WHITE);
+        graphicsContext.setFont(Font.font("Arial", 50));
+
+        // Hiển thị nội dung Tạm dừng
+        graphicsContext.fillText("PAUSED", SCALED_SIZE * 5, SCALED_SIZE * 7);
+
+        graphicsContext.setFont(Font.font("Arial", 25));
+        graphicsContext.fillText("Press P to Resume", SCALED_SIZE * 4.5, SCALED_SIZE * 8);
+        graphicsContext.fillText("Press ESC to Exit", SCALED_SIZE * 4.6, SCALED_SIZE * 8.5);
+    }
+
     public void renderMessage(char c, GraphicsContext graphicsContext) {
         graphicsContext.drawImage(Background, 0, 0);
         switch (c) {
             case 's': graphicsContext.fillText("Stage 1", SCALED_SIZE * 6, SCALED_SIZE * 7.5);
-            break;
+                break;
             case 'c': graphicsContext.fillText("Level Completed!", SCALED_SIZE * 4, SCALED_SIZE * 7.5);
-            break;
+                break;
             case 'o': graphicsContext.fillText("Game Over!", SCALED_SIZE * 5, SCALED_SIZE * 7.5);
-            break;
+                break;
         }
     }
 

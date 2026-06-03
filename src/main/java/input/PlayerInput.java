@@ -12,6 +12,12 @@ public class PlayerInput implements KeyInput {
         keyInput.put("W", false);
         keyInput.put("S", false);
         keyInput.put("SPACE", false);
+
+        // =============================================================
+        // UC5.11a & UC5.12a: Reset trạng thái phím chức năng mới
+        // =============================================================
+        keyInput.put("P", false);
+        keyInput.put("M", false);
     }
 
     @Override
@@ -26,19 +32,14 @@ public class PlayerInput implements KeyInput {
                     // =============================================================
                     // UC2.2: Hệ thống giải mã phím bấm (W,A,S,D) thành hằng số hướng
                     // =============================================================
-                    case ("W"):
-                        return UP;
-                    case ("D"):
-                        return RIGHT;
-                    case ("S"):
-                        return DOWN;
-                    case ("A"):
-                        return LEFT;
+                    case ("W"): return UP;
+                    case ("D"): return RIGHT;
+                    case ("S"): return DOWN;
+                    case ("A"): return LEFT;
                     // ==============================
                     // UC3.1: Người chơi nhấn phím Space
                     // ==============================
-                    case ("SPACE"):
-                        return PLACEBOMB;
+                    case ("SPACE"): return PLACEBOMB;
                 }
             }
         }

@@ -6,30 +6,53 @@ import javax.sound.sampled.Clip;
 import java.io.File;
 
 public class SoundPlay {
+
     private Clip clip;
     private String path;
+
     public SoundPlay(String path) {
         this.path = path;
+
         try {
             File file = new File(path);
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file.getAbsoluteFile());
+
+            AudioInputStream audioInputStream =
+                    AudioSystem.getAudioInputStream(file.getAbsoluteFile());
+
             clip = AudioSystem.getClip();
             clip.open(audioInputStream);
+
         } catch (Exception e) {
             System.out.println(e);
         }
     }
+
     public void play() {
+
+        // UC5.12a - Mute toàn bộ âm thanh
+        if (Sound.isMuted()) {
+            return;
+        }
+
         clip.setFramePosition(0);
         clip.start();
     }
+
     public void loop() {
+
+        if (Sound.isMuted()) {
+            return;
+        }
+
         clip.loop(Clip.LOOP_CONTINUOUSLY);
     }
+
     public void stop() {
         clip.stop();
     }
+
     public boolean isFinish() {
-        return (clip.getMicrosecondLength() == clip.getMicrosecondPosition());
+        return clip.getMicrosecondLength()
+                == clip.getMicrosecondPosition();
     }
 }
