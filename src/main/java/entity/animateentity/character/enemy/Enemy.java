@@ -6,6 +6,8 @@ import graphics.Sprite;
 import map.Map;
 import variables.Variables.DIRECTION;
 import graphics.Sprite;// uc4+
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import static variables.Variables.*;
 
@@ -19,11 +21,10 @@ public abstract class Enemy extends Character {
     protected int changeSpeed;
     protected int defaultCntMove;
     protected int defaultChangeSpeed;
-    //uc4+
+    // uc4+
     protected boolean enraged = false;
     protected java.util.HashMap<Enum, Sprite[]> normalAnimation = new java.util.HashMap<>();
     protected java.util.HashMap<Enum, Sprite[]> enragedAnimation = new java.util.HashMap<>();
-    
 
     public Enemy(int x, int y, Sprite sprite) {
         super(x, y, sprite);
@@ -47,9 +48,9 @@ public abstract class Enemy extends Character {
         this.changeSpeed = changeSpeed;
     }
 
-    //uc4+
+    // uc4+
     public boolean isEnraged() {
-     return enraged;
+        return enraged;
     }
 
     protected void prepareEnragedAnimation() {
@@ -70,7 +71,8 @@ public abstract class Enemy extends Character {
     }
 
     public void becomeEnraged() {
-        if (enraged || isDestroyed() || isRemoved()) return;
+        if (enraged || isDestroyed() || isRemoved())
+            return;
 
         prepareEnragedAnimation();
 
@@ -97,9 +99,9 @@ public abstract class Enemy extends Character {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | AI & Movement Logic
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | AI & Movement Logic
+     * |--------------------------------------------------------------------------
      */
 
     /**
@@ -120,7 +122,8 @@ public abstract class Enemy extends Character {
 
         // =============================================================
         // UC4.4: Thiết lập vận tốc (Velocity) dựa trên hướng đã tính toán
-        // Nếu không có vật cản (xử lý ở lớp Character), quái sẽ di chuyển tới vị trí mới
+        // Nếu không có vật cản (xử lý ở lớp Character), quái sẽ di chuyển tới vị trí
+        // mới
         // =============================================================
         switch (direction) {
             case UP -> this.setVelocity(0, -defaultVel);
@@ -137,24 +140,69 @@ public abstract class Enemy extends Character {
             currentAnimate = animation.get(direction);
         }
     }
+
     @Override
     public void delete() {
-    if (enraged) {
-        life--;
+        if (enraged) {
+            life--;
 
-        if (life <= 0) {
-            this.remove();
-        } else {
-            destroyed = false;
+            if (life <= 0) {
+                this.remove();
+            } else {
+                destroyed = false;
 
-            if (animation.containsKey(direction)) {
-                currentAnimate = animation.get(direction);
+                if (animation.containsKey(direction)) {
+                    currentAnimate = animation.get(direction);
+                }
             }
+
+            return;
         }
 
-        return;
+        this.remove();
     }
 
-    this.remove();
-}
+    // uc4+
+    @Override
+    public void render(GraphicsContext graphicsContext) {
+        if (enraged && !isDestroyed() && !isRemoved()) {
+            renderEnragedAura(graphicsContext);
+        }
+
+        super.render(graphicsContext);
+    }
+
+    private void renderEnragedAura(GraphicsContext graphicsContext) {
+        double screenX = pixelX - map.getRenderX();
+        double screenY = pixelY - map.getRenderY();
+
+        double pulse = Math.sin(game.MainGame.time * 0.25) * 3;
+
+        graphicsContext.save();
+
+        // Lớp lửa đỏ phía ngoài
+        graphicsContext.setGlobalAlpha(0.35);
+        graphicsContext.setFill(Color.RED);
+        graphicsContext.fillOval(screenX - 6 - pulse, screenY - 8 - pulse,
+                44 + pulse * 2, 48 + pulse * 2);
+
+        // Lớp lửa cam phía trong
+        graphicsContext.setGlobalAlpha(0.45);
+        graphicsContext.setFill(Color.ORANGE);
+        graphicsContext.fillOval(screenX - 3, screenY - 5,
+                38 + pulse, 42 + pulse);
+
+        // Các đốm lửa nhỏ xung quanh người
+        graphicsContext.setGlobalAlpha(0.75);
+        graphicsContext.setFill(Color.RED);
+        graphicsContext.fillOval(screenX - 4, screenY + 4 + Math.sin(game.MainGame.time * 0.3) * 3, 8, 12);
+        graphicsContext.fillOval(screenX + 28, screenY + 6 + Math.cos(game.MainGame.time * 0.25) * 3, 8, 12);
+
+        graphicsContext.setFill(Color.ORANGE);
+        graphicsContext.fillOval(screenX + 5, screenY - 6 + Math.sin(game.MainGame.time * 0.35) * 3, 8, 14);
+        graphicsContext.fillOval(screenX + 19, screenY - 8 + Math.cos(game.MainGame.time * 0.3) * 3, 8, 14);
+
+        graphicsContext.restore();
+    }
+
 }
