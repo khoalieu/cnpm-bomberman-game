@@ -152,7 +152,31 @@ public class Map {
             }
         }
 
+// =========================================================================
+        // PHÁT TRIỂN LEVEL 2: KHỞI TẠO VẬT PHẨM NGẪU NHIÊN TRÊN CÁC Ô CỎ TRỐNG
+        // =========================================================================
+        if (levelNumber == 2 && !grassPositions.isEmpty()) {
+            char[] level2Items = {'b', 'f', 's', 'w', 'q', 'm', 'i'};
+            java.util.Collections.shuffle(grassPositions);
 
+            int itemsToSpawn = Math.min(level2Items.length, grassPositions.size());
+            for (int k = 0; k < itemsToSpawn; k++) {
+                int[] pos = grassPositions.get(k);
+                int row = pos[0];
+                int col = pos[1];
+                char itemChar = level2Items[k];
+
+                tiles[row][col] = StaticTexture.setStatic(itemChar, row, col);
+
+                if (tiles[row][col] == null) {
+                    tiles[row][col] = StaticTexture.setStatic('s', row, col);
+                }
+
+                if (tiles[row][col] instanceof Item) {
+                    items.add((Item) tiles[row][col]);
+                }
+            }
+        }
     }
 
     // =====================================
