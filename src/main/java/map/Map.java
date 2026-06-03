@@ -87,24 +87,58 @@ public class Map {
         levelNumber = _string.charAt(0) - '0';
         resetEntities();
         revival = false;
+
+        // Danh sách lưu các tọa độ ô Cỏ trống để có thể đặt vật phẩm ngẫu nhiên
+        java.util.ArrayList<int[]> grassPositions = new java.util.ArrayList<>();
+
         //uc4+
         lastEnemyEnragedTriggered = false;
+
         // [UC1.4]: Vòng lặp duyệt từng dòng (i) và từng ký tự (j) trong ma trận
         for (int i = 0; i < HEIGHT; i++) {
-            String string = scanner.nextLine();
+            String string = scanner.hasNextLine() ? scanner.nextLine() : "";
             for (int j = 0; j < WIDTH; j++) {
-                char c = string.charAt(j); // [UC1.4 - Bước 1.6.1]: Phân tích ký tự 'c'
+                char c = (j < string.length()) ? string.charAt(j) : ' '; // Phân tích ký tự 'c'
+
+                // Khôi phục tường biên an toàn nếu file text bị thiếu hụt khoảng trắng ở cuối
+                if (j == WIDTH - 1 || i == 0 || i == HEIGHT - 1 || j == 0) {
+                    c = '#';
+                }
+
+                // -------------------------------------------------------------
+                // [TỐI ƯU CHO LEVEL 2]: Tách biệt logic nhận diện ô cỏ trống để rải item ngẫu nhiên
+                // -------------------------------------------------------------
+                if (levelNumber == 2) {
+                    // Nếu là ô trống HOẶC là ô chứa vật phẩm cố định của Lvl 1 (w, q, m, i, f, b, s)
+                    if (c == ' ' || c == 'w' || c == 'q' || c == 'm' || c == 'i' || c == 'f' || c == 'b' || c == 's') {
+                        // Thu thập tọa độ ô này để chuẩn bị random vật phẩm
+                        if (!((i == 1 && j == 1) || (i == 1 && j == 2) || (i == 2 && j == 1))) {
+                            grassPositions.add(new int[]{i, j});
+                        }
+
+                        // Ép ký tự c thành ô cỏ trống ' ' ĐÚNG NGHĨA để hệ thống không sinh item cố định tại đây
+                        c = ' ';
+                    }
+                }
+
                 // [UC1.4 - Bước 1.6.2 & 1.6.3]: Tạo StaticEntity (Wall, Grass...)
                 tiles[i][j] = StaticTexture.setStatic(c, i, j);
+
                 // ==============================
                 // UC1.5: Lưu tất cả các đối tượng vừa tạo vào danh sách quản lý đồ họa
                 // ==============================
+                if (tiles[i][j] == null) {
+                    tiles[i][j] = StaticTexture.setStatic(' ', i, j);
+                }
+
+                // [UC1.4a]: Nếu ký tự tương ứng là Vật phẩm (Item), hệ thống nhận diện thực thể Item
                 if (tiles[i][j] instanceof Item) {
                     items.add((Item) tiles[i][j]);
                 }
                 if (c == '*') {
                     tiles[i][j] = BrickTexture.setBrick(i, j);
                 }
+
                 // [UC1.4 - Bước 1.6.4 & 1.6.5]: Tạo AnimateEntity (Bomber, Enemy...)
                 Character character = CharacterTexture.setCharacter(c, i, j);
                 // [UC1.4 - Bước 1.6.6]: Phân loại và lưu vào các danh sách quản lý (player, enemies)
@@ -117,6 +151,8 @@ public class Map {
                 }
             }
         }
+
+
     }
 
     // =====================================
@@ -186,8 +222,9 @@ public class Map {
             scores.remove(score);
         });
     }
+
     //uc4+
-        private void triggerLastEnemyEnragedIfNeeded() {
+    private void triggerLastEnemyEnragedIfNeeded() {
         if (lastEnemyEnragedTriggered) return;
 
         if (enemies.size() == 1) {
@@ -199,7 +236,7 @@ public class Map {
             }
         }
     }
-    
+
     public void updateMap() {
         if (revival) return;
         for (int i = 0; i < HEIGHT; i++) {
@@ -275,12 +312,17 @@ public class Map {
 
     }
 
+    // =========================================================================
+    // [UC1.6a]: (Xử lý Camera) Xác định tọa độ của Người chơi để tính toán vùng nhìn thấy
+    // (Tính toán renderX, renderY bám theo Player để thực hiện hiệu ứng cuộn camera màn hình)
+    // =========================================================================
     private void updateRenderXY() {
         renderX = player.getPixelX() - (WIDTH_SCREEN / 2) * SCALED_SIZE;
         renderY = player.getPixelY() - (HEIGHT_SCREEN / 2) * SCALED_SIZE;
         if (renderX < 0) {
             renderX = 0;
         }
+
         if (renderX > WIDTH * SCALED_SIZE - WIDTH_SCREEN * SCALED_SIZE) {
             renderX = WIDTH * SCALED_SIZE - WIDTH_SCREEN * SCALED_SIZE;
         }
@@ -292,17 +334,29 @@ public class Map {
         }
     }
 
+    // =========================================================================
+    // [UC1.6] & [UC1.8]: Tiến hành vẽ toàn bộ bản đồ và các thực thể theo cơ chế 2 lớp liên tục
+    // =========================================================================
     public void renderMap(GraphicsContext graphicsContext) {
         if (revival) {
             renderRevival(graphicsContext);
             return;
         }
+        // Gọi cập nhật Camera bám theo nhân vật trước khi bắt đầu dựng hình
         updateRenderXY();
+
+        // ---------------------------------------------------------------------
+        // [UC1.6b]: (Đồ họa Lớp 1 - Background Layer) Render mảng nền tĩnh (Cỏ, Tường, Gạch)
+        // ---------------------------------------------------------------------
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 tiles[i][j].render(graphicsContext);
             }
         }
+        // ---------------------------------------------------------------------
+        // [UC1.6c]: (Đồ họa Lớp 2 - Foreground Layer) Render các thực thể động đè lên lớp nền
+        // (Quái vật, Người chơi, Bom, Lửa, Vật phẩm, Điểm số hiển thị)
+        // ---------------------------------------------------------------------
         enemies.forEach(enemy -> {
             enemy.render(graphicsContext);
         });

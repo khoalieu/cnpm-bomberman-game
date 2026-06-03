@@ -97,11 +97,17 @@ public class Menu {
     public void renderMessage(char c, GraphicsContext graphicsContext) {
         graphicsContext.drawImage(Background, 0, 0);
         switch (c) {
-            case 's': graphicsContext.fillText("Stage 1", SCALED_SIZE * 6, SCALED_SIZE * 7.5);
+            case 's':
+                // -----------------------------------------------------------------
+                // TỰ ĐỘNG ĐỔI CHỮ THEO LEVEL THỰC TẾ ĐƯỢC TẢI TỪ FILE CẤU HÌNH
+                // -----------------------------------------------------------------
+                graphicsContext.fillText("Stage " + map.Map.getLevelNumber(), SCALED_SIZE * 6, SCALED_SIZE * 7.5);
                 break;
-            case 'c': graphicsContext.fillText("Level Completed!", SCALED_SIZE * 4, SCALED_SIZE * 7.5);
+            case 'c':
+                graphicsContext.fillText("Level Completed!", SCALED_SIZE * 4, SCALED_SIZE * 7.5);
                 break;
-            case 'o': graphicsContext.fillText("Game Over!", SCALED_SIZE * 5, SCALED_SIZE * 7.5);
+            case 'o':
+                graphicsContext.fillText("Game Over!", SCALED_SIZE * 5, SCALED_SIZE * 7.5);
                 break;
         }
     }
