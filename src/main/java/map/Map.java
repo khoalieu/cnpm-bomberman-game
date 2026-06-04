@@ -29,13 +29,13 @@ public class Map {
     private static int levelNumber;
     private int time = 60 * 200;
     private Image topInfoImage;
-//    private Entity[][] tiles;
+    // private Entity[][] tiles;
 
-    //    private ArrayList<Enemy> enemies;
-//    private ArrayList<Bomb> bombs;
-//    private ArrayList<Flame> flames;
-//    private ArrayList<Item> items;
-//    private ArrayList<Score> scores;
+    // private ArrayList<Enemy> enemies;
+    // private ArrayList<Bomb> bombs;
+    // private ArrayList<Flame> flames;
+    // private ArrayList<Item> items;
+    // private ArrayList<Score> scores;
     private Entity[][] tiles = new Entity[HEIGHT][WIDTH];
 
     private ArrayList<Enemy> enemies = new ArrayList<>();
@@ -48,7 +48,7 @@ public class Map {
     private boolean revival;
     private int renderX;
     private int renderY;
-    //uc4+
+    // uc4+ // UC4.6a - Kích hoạt trạng thái tức giận khi còn một quái vật cuối cùng
     private boolean lastEnemyEnragedTriggered = false;
 
     public static Map getGameMap() {
@@ -91,7 +91,8 @@ public class Map {
         // Danh sách lưu các tọa độ ô Cỏ trống để có thể đặt vật phẩm ngẫu nhiên
         java.util.ArrayList<int[]> grassPositions = new java.util.ArrayList<>();
 
-        //uc4+
+        // uc4+ // UC4.6a.5 - Trạng thái Enraged chỉ được kích hoạt một lần trong mỗi
+        // màn chơi
         lastEnemyEnragedTriggered = false;
 
         // [UC1.4]: Vòng lặp duyệt từng dòng (i) và từng ký tự (j) trong ma trận
@@ -106,17 +107,20 @@ public class Map {
                 }
 
                 // -------------------------------------------------------------
-                // [TỐI ƯU CHO LEVEL 2]: Tách biệt logic nhận diện ô cỏ trống để rải item ngẫu nhiên
+                // [TỐI ƯU CHO LEVEL 2]: Tách biệt logic nhận diện ô cỏ trống để rải item ngẫu
+                // nhiên
                 // -------------------------------------------------------------
                 if (levelNumber == 2) {
-                    // Nếu là ô trống HOẶC là ô chứa vật phẩm cố định của Lvl 1 (w, q, m, i, f, b, s)
+                    // Nếu là ô trống HOẶC là ô chứa vật phẩm cố định của Lvl 1 (w, q, m, i, f, b,
+                    // s)
                     if (c == ' ' || c == 'w' || c == 'q' || c == 'm' || c == 'i' || c == 'f' || c == 'b' || c == 's') {
                         // Thu thập tọa độ ô này để chuẩn bị random vật phẩm
                         if (!((i == 1 && j == 1) || (i == 1 && j == 2) || (i == 2 && j == 1))) {
-                            grassPositions.add(new int[]{i, j});
+                            grassPositions.add(new int[] { i, j });
                         }
 
-                        // Ép ký tự c thành ô cỏ trống ' ' ĐÚNG NGHĨA để hệ thống không sinh item cố định tại đây
+                        // Ép ký tự c thành ô cỏ trống ' ' ĐÚNG NGHĨA để hệ thống không sinh item cố
+                        // định tại đây
                         c = ' ';
                     }
                 }
@@ -131,7 +135,8 @@ public class Map {
                     tiles[i][j] = StaticTexture.setStatic(' ', i, j);
                 }
 
-                // [UC1.4a]: Nếu ký tự tương ứng là Vật phẩm (Item), hệ thống nhận diện thực thể Item
+                // [UC1.4a]: Nếu ký tự tương ứng là Vật phẩm (Item), hệ thống nhận diện thực thể
+                // Item
                 if (tiles[i][j] instanceof Item) {
                     items.add((Item) tiles[i][j]);
                 }
@@ -141,7 +146,8 @@ public class Map {
 
                 // [UC1.4 - Bước 1.6.4 & 1.6.5]: Tạo AnimateEntity (Bomber, Enemy...)
                 Character character = CharacterTexture.setCharacter(c, i, j);
-                // [UC1.4 - Bước 1.6.6]: Phân loại và lưu vào các danh sách quản lý (player, enemies)
+                // [UC1.4 - Bước 1.6.6]: Phân loại và lưu vào các danh sách quản lý (player,
+                // enemies)
                 if (character != null) {
                     if (c == 'p') {
                         player = (Bomber) character;
@@ -152,11 +158,11 @@ public class Map {
             }
         }
 
-// =========================================================================
+        // =========================================================================
         // PHÁT TRIỂN LEVEL 2: KHỞI TẠO VẬT PHẨM NGẪU NHIÊN TRÊN CÁC Ô CỎ TRỐNG
         // =========================================================================
         if (levelNumber == 2 && !grassPositions.isEmpty()) {
-            char[] level2Items = {'b', 'f', 's', 'w', 'q', 'm', 'i'};
+            char[] level2Items = { 'b', 'f', 's', 'w', 'q', 'm', 'i' };
             java.util.Collections.shuffle(grassPositions);
 
             int itemsToSpawn = Math.min(level2Items.length, grassPositions.size());
@@ -213,7 +219,8 @@ public class Map {
                 removedFlames.add(flame);
             }
         });
-        if (player.isRemoved()) player = null;
+        if (player.isRemoved())
+            player = null;
         removedEnemies.forEach(enemy -> {
             if (enemy instanceof Balloom) {
                 Score score = ScoreTexture.setScore('b', enemy.getTileX(), enemy.getTileY());
@@ -247,22 +254,36 @@ public class Map {
         });
     }
 
-    //uc4+
+    // uc4+
+    // ========================================================================
+    // UC4.6a - Kích hoạt trạng thái tức giận khi còn một quái vật cuối cùng
+    // ========================================================================
     private void triggerLastEnemyEnragedIfNeeded() {
-        if (lastEnemyEnragedTriggered) return;
-
+        // UC4.6a.5 - Trạng thái Enraged chỉ được kích hoạt một lần trong mỗi màn chơi
+        // nhằm tránh việc quái vật bị tăng mạng hoặc tăng tốc nhiều lần.
+        if (lastEnemyEnragedTriggered)
+            return;
+        // UC4.6a.1 - Sau khi hệ thống xử lý xóa các quái vật đã bị tiêu diệt khỏi danh
+        // sách quản lý,
+        // hệ thống kiểm tra số lượng quái vật còn tồn tại trên bản đồ.
         if (enemies.size() == 1) {
             Enemy lastEnemy = enemies.get(0);
 
+            // UC4.6a.2 - Nếu số lượng quái vật còn lại bằng 1 và trạng thái tức giận chưa
+            // từng
+            // được kích hoạt trong màn chơi hiện tại, hệ thống xác định quái vật cuối cùng
+            // là đối tượng được tăng cường.
             if (!lastEnemy.isDestroyed() && !lastEnemy.isRemoved()) {
                 lastEnemy.becomeEnraged();
+                // UC4.6a.5 - Trạng thái Enraged chỉ được kích hoạt một lần trong mỗi màn chơi
                 lastEnemyEnragedTriggered = true;
             }
         }
     }
 
     public void updateMap() {
-        if (revival) return;
+        if (revival)
+            return;
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 tiles[i][j].update();
@@ -285,6 +306,10 @@ public class Map {
             score.update();
         });
         removeEntities();
+
+        // UC4.6a.1 - Sau khi hệ thống xử lý xóa các quái vật đã bị tiêu diệt khỏi danh
+        // sách quản lý,
+        // hệ thống kiểm tra số lượng quái vật còn tồn tại trên bản đồ.
         triggerLastEnemyEnragedIfNeeded();
     }
 
@@ -337,8 +362,10 @@ public class Map {
     }
 
     // =========================================================================
-    // [UC1.6a]: (Xử lý Camera) Xác định tọa độ của Người chơi để tính toán vùng nhìn thấy
-    // (Tính toán renderX, renderY bám theo Player để thực hiện hiệu ứng cuộn camera màn hình)
+    // [UC1.6a]: (Xử lý Camera) Xác định tọa độ của Người chơi để tính toán vùng
+    // nhìn thấy
+    // (Tính toán renderX, renderY bám theo Player để thực hiện hiệu ứng cuộn camera
+    // màn hình)
     // =========================================================================
     private void updateRenderXY() {
         renderX = player.getPixelX() - (WIDTH_SCREEN / 2) * SCALED_SIZE;
@@ -359,7 +386,8 @@ public class Map {
     }
 
     // =========================================================================
-    // [UC1.6] & [UC1.8]: Tiến hành vẽ toàn bộ bản đồ và các thực thể theo cơ chế 2 lớp liên tục
+    // [UC1.6] & [UC1.8]: Tiến hành vẽ toàn bộ bản đồ và các thực thể theo cơ chế 2
+    // lớp liên tục
     // =========================================================================
     public void renderMap(GraphicsContext graphicsContext) {
         if (revival) {
@@ -370,7 +398,8 @@ public class Map {
         updateRenderXY();
 
         // ---------------------------------------------------------------------
-        // [UC1.6b]: (Đồ họa Lớp 1 - Background Layer) Render mảng nền tĩnh (Cỏ, Tường, Gạch)
+        // [UC1.6b]: (Đồ họa Lớp 1 - Background Layer) Render mảng nền tĩnh (Cỏ, Tường,
+        // Gạch)
         // ---------------------------------------------------------------------
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
@@ -378,7 +407,8 @@ public class Map {
             }
         }
         // ---------------------------------------------------------------------
-        // [UC1.6c]: (Đồ họa Lớp 2 - Foreground Layer) Render các thực thể động đè lên lớp nền
+        // [UC1.6c]: (Đồ họa Lớp 2 - Foreground Layer) Render các thực thể động đè lên
+        // lớp nền
         // (Quái vật, Người chơi, Bom, Lửa, Vật phẩm, Điểm số hiển thị)
         // ---------------------------------------------------------------------
         enemies.forEach(enemy -> {
@@ -398,7 +428,6 @@ public class Map {
             score.render(graphicsContext);
         });
     }
-
 
     public void setTile(int x, int y, Entity entity) {
         tiles[x][y] = entity;

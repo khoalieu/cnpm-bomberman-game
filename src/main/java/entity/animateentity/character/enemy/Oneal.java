@@ -12,7 +12,7 @@ import static variables.Variables.DIRECTION.*;
  * Thực thể Oneal: Loại quái vật có trí tuệ nhân tạo nâng cao
  * Triển khai logic UC4 với khả năng thay đổi tốc độ và bám đuổi người chơi
  */
-public class Oneal extends Enemy{
+public class Oneal extends Enemy {
     public Oneal(int x, int y, Sprite sprite) {
         super(x, y, sprite);
 
@@ -34,12 +34,12 @@ public class Oneal extends Enemy{
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | AI Logic - Xử lý trí tuệ nhân tạo
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | AI Logic - Xử lý trí tuệ nhân tạo
+     * |--------------------------------------------------------------------------
      */
     @Override
-    public DIRECTION path(Map map, Bomber player, Enemy enemy){
+    public DIRECTION path(Map map, Bomber player, Enemy enemy) {
         // =========================================================================
         // UC4.2: Hệ thống xác định thuật toán AI nâng cao (SpeedDistancePath)
         // Thuật toán này cho phép Oneal thay đổi vận tốc dựa trên vị trí của Bomber
@@ -54,15 +54,16 @@ public class Oneal extends Enemy{
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Methods - Xử lý trạng thái thực thể
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | Methods - Xử lý trạng thái thực thể
+     * |--------------------------------------------------------------------------
      */
     @Override
     public void delete() {
         // =============================================================
         // UC4.5a.3: Thực thể quái vật bị xóa khỏi bộ nhớ sau khi bị tiêu diệt
         // =============================================================
-       super.delete();
+        // UC4.7a - Quái vật ở trạng thái tức giận bị trúng tia lửa
+        super.delete();
     }
 }

@@ -36,9 +36,9 @@ public class Doll extends Enemy {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | AI Logic - Xử lý quyết định hướng đi
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | AI Logic - Xử lý quyết định hướng đi
+     * |--------------------------------------------------------------------------
      */
     @Override
     public DIRECTION path(Map map, Bomber player, Enemy enemy) {
@@ -55,25 +55,16 @@ public class Doll extends Enemy {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Methods - Xử lý trạng thái thực thể
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | Methods - Xử lý trạng thái thực thể
+     * |--------------------------------------------------------------------------
      */
     @Override
     public void delete() {
         // =============================================================
         // UC4.5a: Quái vật bị tiêu diệt bởi tia lửa (Flame)
         // =============================================================
-
-        // UC4.5a.2: Giảm mạng và chuẩn bị thực hiện hoạt ảnh nổ/chết
-        // life --;
-        // destroyed = false; // Reset trạng thái chờ để thực hiện animation chết
-
-        // if (life == 0) {
-        //     // UC4.5a.3: Thực thể bị xóa khỏi bộ nhớ (Map) khi hết mạng
-        //     this.remove();
-        // } 
-        //uc4+
-      super.delete();
+        // UC4.7a - Quái vật ở trạng thái tức giận bị trúng tia lửa
+        super.delete();
     }
 }

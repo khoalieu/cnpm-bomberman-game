@@ -14,7 +14,8 @@ import static variables.Variables.HEIGHT;
 import static variables.Variables.WIDTH;
 
 /**
- * Thực thể Kondoria: Loại quái vật có khả năng đi xuyên tường gạch và né tránh bom
+ * Thực thể Kondoria: Loại quái vật có khả năng đi xuyên tường gạch và né tránh
+ * bom
  * Triển khai UC4 với khả năng xử lý va chạm môi trường đặc biệt
  */
 public class Kondoria extends Enemy {
@@ -40,9 +41,9 @@ public class Kondoria extends Enemy {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | AI Logic
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | AI Logic
+     * |--------------------------------------------------------------------------
      */
     @Override
     public DIRECTION path(Map map, Bomber player, Enemy enemy) {
@@ -55,9 +56,9 @@ public class Kondoria extends Enemy {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Collision Logic - Xử lý ngoại lệ UC4.4a
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | Collision Logic - Xử lý ngoại lệ UC4.4a
+     * |--------------------------------------------------------------------------
      */
     @Override
     public void checkCollision() {
@@ -89,7 +90,7 @@ public class Kondoria extends Enemy {
             if (entity1.isBlock() && this.isCollider(entity1)) {
                 isCollision = true;
             }
-            if(this.isCollider(entity1) && this instanceof Enemy) {
+            if (this.isCollider(entity1) && this instanceof Enemy) {
                 isCollision = true;
             }
         });
@@ -100,15 +101,16 @@ public class Kondoria extends Enemy {
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Methods
-    |--------------------------------------------------------------------------
+     * |--------------------------------------------------------------------------
+     * | Methods
+     * |--------------------------------------------------------------------------
      */
     @Override
     public void delete() {
         // =============================================================
         // UC4.5a.3: Quái vật bị tiêu diệt, xóa thực thể khỏi bộ nhớ hệ thống
         // =============================================================
+        // UC4.7a - Quái vật ở trạng thái tức giận bị trúng tia lửa
         super.delete();
     }
 }
