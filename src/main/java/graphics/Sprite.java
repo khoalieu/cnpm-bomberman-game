@@ -247,8 +247,22 @@ public class Sprite {
         public static Sprite powerup_bombpass = new Sprite(DEFAULT_SIZE, 5, 10, SpriteSheet.tiles, 16, 16);
         public static Sprite powerup_flamepass = new Sprite(DEFAULT_SIZE, 6, 10, SpriteSheet.tiles, 16, 16);
         public static Sprite powerup_mystery = new Sprite(DEFAULT_SIZE, 7, 10, SpriteSheet.tiles, 16, 16);
-        public static Sprite powerup_kick = new Sprite(DEFAULT_SIZE, 2, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item đá bom
-        public static Sprite powerup_piercebomb = new Sprite(DEFAULT_SIZE, 3, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay đổi tọa độ x, y cho đúng với ảnh item bom xuyên thấu
+        public static Sprite powerup_kick = new Sprite(DEFAULT_SIZE, 2, 10, SpriteSheet.tiles, 16, 16); // TODO: Thay
+                                                                                                        // đổi tọa độ x,
+                                                                                                        // y cho đúng
+                                                                                                        // với ảnh item
+                                                                                                        // đá bom
+        public static Sprite powerup_piercebomb = new Sprite(DEFAULT_SIZE, 3, 10, SpriteSheet.tiles, 16, 16); // TODO:
+                                                                                                              // Thay
+                                                                                                              // đổi tọa
+                                                                                                              // độ x, y
+                                                                                                              // cho
+                                                                                                              // đúng
+                                                                                                              // với ảnh
+                                                                                                              // item
+                                                                                                              // bom
+                                                                                                              // xuyên
+                                                                                                              // thấu
         /*
          * |--------------------------------------------------------------------------
          * | Scores
@@ -357,7 +371,14 @@ public class Sprite {
         }
 
         // uc4+
+        // ========================================================================
+        // UC4.6a.4 - Hệ thống cập nhật hoạt ảnh của quái vật sang phiên bản tức giận.
+        // Sprite của quái vật được chuyển sang tông đỏ/cam, đồng thời hiển thị hiệu ứng
+        // lửa đỏ
+        // bao quanh cơ thể và biểu cảm khuôn mặt tức giận.
+        // ========================================================================
         public Sprite createEnragedSprite() {
+                // code tạo sprite tức giận
                 Sprite result = new Sprite(this.SIZE, TRANSPARENT_COLOR);
 
                 result._realWidth = this._realWidth;
@@ -376,20 +397,21 @@ public class Sprite {
                         int green = (argb >> 8) & 0xff;
                         int blue = argb & 0xff;
 
-                        // Tông enraged: đỏ/cam hơn sprite gốc
+                        // UC4.6a.4 - Sprite của quái vật được chuyển sang tông đỏ/cam
                         red = Math.min(255, red + 70);
                         green = Math.max(0, green - 10);
                         blue = Math.max(0, blue - 35);
 
                         result._pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
                 }
-
+                // UC4.6a.4 - Hiển thị biểu cảm khuôn mặt tức giận
                 result.drawAngryFaceOverlay();
 
                 return result;
         }
 
         // uc4+
+        // UC4.6a.4 - Hiển thị biểu cảm khuôn mặt tức giận
         private void drawAngryFaceOverlay() {
                 int dark = 0xff2b0000;
                 int redEye = 0xffff0000;
@@ -428,7 +450,9 @@ public class Sprite {
                 _pixels[index] = color;
         }
 
+        // UC4.6a.4 - Hệ thống cập nhật hoạt ảnh của quái vật sang phiên bản tức giận
         public static Sprite[] createEnragedAnimation(Sprite[] normalAnimation) {
+                   // code tạo animation tức giận
                 Sprite[] enragedAnimation = new Sprite[normalAnimation.length];
 
                 for (int i = 0; i < normalAnimation.length; i++) {

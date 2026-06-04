@@ -22,7 +22,11 @@ public abstract class Enemy extends Character {
     protected int defaultCntMove;
     protected int defaultChangeSpeed;
     // uc4+
+    //// ========================================================================
+    // UC4.6a - Kích hoạt trạng thái tức giận khi còn một quái vật cuối cùng
+    // ========================================================================
     protected boolean enraged = false;
+    // UC4.6a.4 - Hệ thống cập nhật hoạt ảnh của quái vật sang phiên bản tức giận
     protected java.util.HashMap<Enum, Sprite[]> normalAnimation = new java.util.HashMap<>();
     protected java.util.HashMap<Enum, Sprite[]> enragedAnimation = new java.util.HashMap<>();
 
@@ -49,10 +53,17 @@ public abstract class Enemy extends Character {
     }
 
     // uc4+
+    // UC4.7a - Quái vật ở trạng thái tức giận bị trúng tia lửa
     public boolean isEnraged() {
         return enraged;
     }
 
+    // ========================================================================
+    // UC4.6a.4 - Hệ thống cập nhật hoạt ảnh của quái vật sang phiên bản tức giận.
+    // Sprite của quái vật được chuyển sang tông đỏ/cam, đồng thời hiển thị hiệu ứng
+    // lửa đỏ
+    // bao quanh cơ thể và biểu cảm khuôn mặt tức giận.
+    // ========================================================================
     protected void prepareEnragedAnimation() {
         normalAnimation.clear();
         enragedAnimation.clear();
@@ -70,24 +81,29 @@ public abstract class Enemy extends Character {
         }
     }
 
+    // ========================================================================
+    // UC4.6a - Kích hoạt trạng thái tức giận khi còn một quái vật cuối cùng
+    // ========================================================================
     public void becomeEnraged() {
+        // UC4.6a.5 - Trạng thái Enraged chỉ được kích hoạt một lần trong mỗi màn chơi
+        // nhằm tránh việc quái vật bị tăng mạng hoặc tăng tốc nhiều lần.
         if (enraged || isDestroyed() || isRemoved())
             return;
-
+        // UC4.6a.4 - Hệ thống cập nhật hoạt ảnh của quái vật sang phiên bản tức giận.
         prepareEnragedAnimation();
-
+        // UC4.6a.3 - Hệ thống chuyển quái vật cuối cùng sang trạng thái Enraged.
         enraged = true;
 
-        // Tăng mạng lên ít nhất 3.
+        // UC4.6a.3 - Ở trạng thái này, quái vật được tăng số mạng lên tối thiểu 3 mạng.
         this.life = Math.max(this.life, 3);
 
-        // Tăng tốc an toàn.
-        // Không tăng defaultVel để tránh lỗi đi xuyên tile/collision.
+        // UC4.6a.3 - Ở trạng thái này, quái vật được tăng tốc độ di chuyển.
         this.speed += 1;
-
+        // UC4.6a.4 - Hệ thống cập nhật hoạt ảnh của quái vật sang phiên bản tức giận.
         useEnragedAnimation();
     }
 
+    // UC4.6a.4 - Hệ thống cập nhật hoạt ảnh của quái vật sang phiên bản tức giận
     protected void useEnragedAnimation() {
         for (Enum key : enragedAnimation.keySet()) {
             animation.put(key, enragedAnimation.get(key));
@@ -141,14 +157,26 @@ public abstract class Enemy extends Character {
         }
     }
 
+    // ========================================================================
+    // UC4.5a - Quái vật bị tiêu diệt bởi tia lửa (Flame)
+    // UC4.7a - Quái vật ở trạng thái tức giận bị trúng tia lửa
+    // ========================================================================
     @Override
     public void delete() {
+        // UC4.7a.1 - Nếu quái vật cuối cùng đang ở trạng thái Enraged bị Flame tác
+        // động,
+        // hệ thống không xóa quái vật ngay lập tức mà thực hiện trừ một mạng sống của
+        // quái vật.
         if (enraged) {
             life--;
-
+            // UC4.7a.3 - Nếu số mạng của quái vật giảm về 0, hệ thống thực hiện xóa thực
+            // thể quái vật khỏi bộ nhớ quản lý.
             if (life <= 0) {
                 this.remove();
             } else {
+                // UC4.7a.2 - Nếu số mạng của quái vật sau khi bị trừ vẫn lớn hơn 0,
+                // hệ thống hủy trạng thái destroyed tạm thời và cho quái vật tiếp tục tồn tại
+                // trên bản đồ.
                 destroyed = false;
 
                 if (animation.containsKey(direction)) {
@@ -159,13 +187,22 @@ public abstract class Enemy extends Character {
             return;
         }
 
+        // UC4.5a.3 - Thực thể quái vật bị xóa khỏi bộ nhớ;
+        // hệ thống cập nhật điểm số và kiểm tra điều kiện mở Portal.
         this.remove();
     }
 
     // uc4+
+    //// ========================================================================
+    // UC4.6a.4 - Sprite của quái vật được chuyển sang tông đỏ/cam, đồng thời hiển
+    // thị
+    // hiệu ứng lửa đỏ bao quanh cơ thể và biểu cảm khuôn mặt tức giận.
+    // ========================================================================
     @Override
+    // UC4.6a.4 - Hiển thị hiệu ứng lửa đỏ bao quanh cơ thể quái vật
     public void render(GraphicsContext graphicsContext) {
         if (enraged && !isDestroyed() && !isRemoved()) {
+            // code render aura ở đây
             renderEnragedAura(graphicsContext);
         }
 
