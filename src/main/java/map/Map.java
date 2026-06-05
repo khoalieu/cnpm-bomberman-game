@@ -99,7 +99,7 @@ public class Map {
         for (int i = 0; i < HEIGHT; i++) {
             String string = scanner.hasNextLine() ? scanner.nextLine() : "";
             for (int j = 0; j < WIDTH; j++) {
-                char c = (j < string.length()) ? string.charAt(j) : ' '; // Phân tích ký tự 'c'
+                char c = (j < string.length()) ? string.charAt(j) : ' ';
 
                 // Khôi phục tường biên an toàn nếu file text bị thiếu hụt khoảng trắng ở cuối
                 if (j == WIDTH - 1 || i == 0 || i == HEIGHT - 1 || j == 0) {
@@ -186,7 +186,7 @@ public class Map {
     }
 
     // =====================================
-    // UC5.8 - Hệ thống dọn dẹp dữ liệu màn hiện tại
+    // UC5.9. Hệ thống dọn dẹp dữ liệu màn hiện tại.
     // =====================================
     private void removeEntities() {
         ArrayList<Enemy> removedEnemies = new ArrayList<>();
@@ -194,33 +194,15 @@ public class Map {
         ArrayList<Flame> removedFlames = new ArrayList<>();
         ArrayList<Item> removedItems = new ArrayList<>();
         ArrayList<Score> removedScores = new ArrayList<>();
-        scores.forEach(score -> {
-            if (score.isRemoved()) {
-                removedScores.add(score);
-            }
-        });
-        items.forEach(item -> {
-            if (item.isRemoved()) {
-                removedItems.add(item);
-            }
-        });
-        enemies.forEach(enemy -> {
-            if (enemy.isRemoved()) {
-                removedEnemies.add(enemy);
-            }
-        });
-        bombs.forEach(bomb -> {
-            if (bomb.isRemoved()) {
-                removedBombs.add(bomb);
-            }
-        });
-        flames.forEach(flame -> {
-            if (flame.isRemoved()) {
-                removedFlames.add(flame);
-            }
-        });
-        if (player.isRemoved())
-            player = null;
+
+        scores.forEach(score -> { if (score.isRemoved()) removedScores.add(score); });
+        items.forEach(item -> { if (item.isRemoved()) removedItems.add(item); });
+        enemies.forEach(enemy -> { if (enemy.isRemoved()) removedEnemies.add(enemy); });
+        bombs.forEach(bomb -> { if (bomb.isRemoved()) removedBombs.add(bomb); });
+        flames.forEach(flame -> { if (flame.isRemoved()) removedFlames.add(flame); });
+
+        if (player.isRemoved()) player = null;
+
         removedEnemies.forEach(enemy -> {
             if (enemy instanceof Balloom) {
                 Score score = ScoreTexture.setScore('b', enemy.getTileX(), enemy.getTileY());
@@ -240,18 +222,10 @@ public class Map {
             }
             enemies.remove(enemy);
         });
-        removedBombs.forEach(bomb -> {
-            bombs.remove(bomb);
-        });
-        removedFlames.forEach(flame -> {
-            flames.remove(flame);
-        });
-        removedItems.forEach(item -> {
-            items.remove(item);
-        });
-        removedScores.forEach(score -> {
-            scores.remove(score);
-        });
+        removedBombs.forEach(bomb -> bombs.remove(bomb));
+        removedFlames.forEach(flame -> flames.remove(flame));
+        removedItems.forEach(item -> items.remove(item));
+        removedScores.forEach(score -> scores.remove(score));
     }
 
     // uc4+
@@ -282,29 +256,19 @@ public class Map {
     }
 
     public void updateMap() {
-        if (revival)
-            return;
+        if (revival) return;
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 tiles[i][j].update();
             }
         }
-        enemies.forEach(enemy -> {
-            enemy.update();
-        });
+        enemies.forEach(enemy -> enemy.update());
         player.update();
-        bombs.forEach(bomb -> {
-            bomb.update();
-        });
-        flames.forEach(flame -> {
-            flame.update();
-        });
-        items.forEach(item -> {
-            item.update();
-        });
-        scores.forEach(score -> {
-            score.update();
-        });
+        bombs.forEach(bomb -> bomb.update());
+        flames.forEach(flame -> flame.update());
+        items.forEach(item -> item.update());
+        scores.forEach(score -> score.update());
+
         removeEntities();
 
         // UC4.6a.1 - Sau khi hệ thống xử lý xóa các quái vật đã bị tiêu diệt khỏi danh
@@ -354,22 +318,25 @@ public class Map {
                 tiles[i][j].render(graphicsContext);
             }
         }
-        enemies.forEach(enemy -> {
-            enemy.render(graphicsContext);
-        });
+        enemies.forEach(enemy -> enemy.render(graphicsContext));
         player.render(graphicsContext);
-
     }
-
     // =========================================================================
     // [UC1.6a]: (Xử lý Camera) Xác định tọa độ của Người chơi để tính toán vùng
     // nhìn thấy
     // (Tính toán renderX, renderY bám theo Player để thực hiện hiệu ứng cuộn camera
     // màn hình)
     // =========================================================================
+
+    // =====================================
+    // UC5.13a Hệ thống điều khiển Camera theo nhân vật (Camera Follow)
+    // =====================================
     private void updateRenderXY() {
+        // UC5.13a.1. Trong mỗi vòng lặp AnimationTimer, hệ thống xác định tọa độ hiện tại (x, y) của Bomber.
+        // UC5.13a.2. Hệ thống tính toán giá trị offset để giữ nhân vật luôn ở vị trí trung tâm màn hình (Viewport).
         renderX = player.getPixelX() - (WIDTH_SCREEN / 2) * SCALED_SIZE;
         renderY = player.getPixelY() - (HEIGHT_SCREEN / 2) * SCALED_SIZE;
+
         if (renderX < 0) {
             renderX = 0;
         }
@@ -394,7 +361,8 @@ public class Map {
             renderRevival(graphicsContext);
             return;
         }
-        // Gọi cập nhật Camera bám theo nhân vật trước khi bắt đầu dựng hình
+
+        // UC5.13a.3. Hệ thống cập nhật tọa độ vẽ của lớp Map dựa trên offset vừa tính.
         updateRenderXY();
 
         // ---------------------------------------------------------------------
@@ -411,6 +379,9 @@ public class Map {
         // lớp nền
         // (Quái vật, Người chơi, Bom, Lửa, Vật phẩm, Điểm số hiển thị)
         // ---------------------------------------------------------------------
+        // =====================================
+        // UC5.13a.4. Các thực thể (Bombs, Enemies, Items) được render dựa trên tọa độ mới này, tạo hiệu ứng Camera di chuyển mượt mà theo nhân vật.
+        // =====================================
         enemies.forEach(enemy -> {
             enemy.render(graphicsContext);
         });
