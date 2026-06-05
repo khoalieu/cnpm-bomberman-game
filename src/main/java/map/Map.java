@@ -113,14 +113,12 @@ public class Map {
                 if (levelNumber == 2) {
                     // Nếu là ô trống HOẶC là ô chứa vật phẩm cố định của Lvl 1 (w, q, m, i, f, b,
                     // s)
-                    if (c == ' ' || c == 'w' || c == 'q' || c == 'm' || c == 'i' || c == 'f' || c == 'b' || c == 's') {
+                    if (c == ' ' || c == 'w' || c == 'q' || c == 'm' || c == 'i' || c == 'f' || c == 'b' || c == 's' || c == 'k' || c == 'c') {
                         // Thu thập tọa độ ô này để chuẩn bị random vật phẩm
                         if (!((i == 1 && j == 1) || (i == 1 && j == 2) || (i == 2 && j == 1))) {
                             grassPositions.add(new int[] { i, j });
                         }
-
-                        // Ép ký tự c thành ô cỏ trống ' ' ĐÚNG NGHĨA để hệ thống không sinh item cố
-                        // định tại đây
+                        // Ép ký tự c thành ô cỏ trống ' ' ĐÚNG NGHĨA
                         c = ' ';
                     }
                 }
@@ -165,7 +163,7 @@ public class Map {
 
         //[UC1.5a] Không đủ vị trí ô cỏ trống ở Level 2
         if (levelNumber == 2 && !grassPositions.isEmpty()) {
-            char[] level2Items = { 'b', 'f', 's', 'w', 'q', 'm', 'i' };
+            char[] level2Items = { 'b', 'f', 's', 'w', 'q', 'm', 'i', 'k', 'c' };
             java.util.Collections.shuffle(grassPositions);
 
             int itemsToSpawn = Math.min(level2Items.length, grassPositions.size());
