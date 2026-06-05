@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MapDevelopmentTest {
+public class UC1_DevelopmentTest {
     private Map gameMap;
 
     @BeforeAll
