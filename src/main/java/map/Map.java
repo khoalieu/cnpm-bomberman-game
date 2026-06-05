@@ -131,6 +131,7 @@ public class Map {
                 // ==============================
                 // UC1.5: Lưu tất cả các đối tượng vừa tạo vào danh sách quản lý đồ họa
                 // ==============================
+                //[UC1.4b - Ký tự vật phẩm không hợp lệ / Thiếu kết cấu]
                 if (tiles[i][j] == null) {
                     tiles[i][j] = StaticTexture.setStatic(' ', i, j);
                 }
@@ -161,6 +162,8 @@ public class Map {
         // =========================================================================
         // PHÁT TRIỂN LEVEL 2: KHỞI TẠO VẬT PHẨM NGẪU NHIÊN TRÊN CÁC Ô CỎ TRỐNG
         // =========================================================================
+
+        //[UC1.5a] Không đủ vị trí ô cỏ trống ở Level 2
         if (levelNumber == 2 && !grassPositions.isEmpty()) {
             char[] level2Items = { 'b', 'f', 's', 'w', 'q', 'm', 'i' };
             java.util.Collections.shuffle(grassPositions);
