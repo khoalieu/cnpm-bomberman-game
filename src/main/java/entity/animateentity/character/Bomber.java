@@ -44,7 +44,7 @@ public class Bomber extends Character {
     }
 
     @Override
-    protected boolean canPass(Entity entity) {
+    public boolean canPass(Entity entity) {
         // =============================================================
         // UC2.4a.1. Nếu tại tọa độ tiếp theo có va chạm trực diện với vật cản cứng (Wall, Brick, Bomb),
         // hệ thống kiểm tra cờ trạng thái xuyên thấu của nhân vật.
