@@ -10,6 +10,7 @@ import input.KeyInput;
 import sound.Sound;
 import texture.BombTexture;
 import map.Map;
+import javafx.scene.canvas.GraphicsContext;
 
 import static graphics.Sprite.*;
 import static variables.Variables.DIRECTION.*;
@@ -29,6 +30,8 @@ public class Bomber extends Character {
     public boolean hasKickAbility = false;
     public boolean hasPierceBomb = false;
     public int pierceBombTimer = 0;
+
+    private int immortal = 0;
 
     public Bomber(int x, int y, Sprite sprite, KeyInput keyInput) {
         super(x, y, sprite);
@@ -200,6 +203,10 @@ public class Bomber extends Character {
         // =============================================================
         super.checkCollision();
         handleImmortalState();
+
+        // =====================================
+        // UC5.3. Hệ thống liên tục kiểm tra trạng thái của nhân vật Bomber.
+        // =====================================
         handleEnemyCollision();
         handleItemCollision();
         handleBombBlocking();
@@ -361,8 +368,10 @@ public class Bomber extends Character {
         immortal = 100;
         //UC5.3a.3. Hệ thống kích hoạt trạng thái hồi sinh
         map.setRevival(true);
-        //UC5.3a.4. Bomber được đưa về vị trí bắt đầu
+
+        // UC5.3a.4. Bomber được đưa về vị trí bắt đầu
         setPosition(SCALED_SIZE, SCALED_SIZE);
+
         destroyed = false;
         direction = NONE;
         setSprite(Sprite.PLAYER_DOWN[0]);
@@ -378,28 +387,28 @@ public class Bomber extends Character {
         // =============================================================
         // UC2.4b.4 (Bổ sung): Hệ thống đếm ngược thời gian hiệu lực của Vật phẩm và tự động gỡ bỏ buff khi hết hạn.
         // =============================================================
-        if (passWallTimer > 0) {
-            passWallTimer--;
-            if (passWallTimer == 0) passWall = false;
-        }
-        if (passBombTimer > 0) {
-            passBombTimer--;
-            if (passBombTimer == 0) passBomb = false;
-        }
-        if (shieldTimer > 0) {
-            shieldTimer--;
-            if (shieldTimer == 0) hasShield = false;
-        }
-        if (flamePassTimer > 0) {
-            flamePassTimer--;
-            if (flamePassTimer == 0) isFlamePass = false;
-        }
-        if (pierceBombTimer > 0) {
-            pierceBombTimer--;
-            if (pierceBombTimer == 0) hasPierceBomb = false; // Hết 20s, mất hiệu lực
-        }
+        // =====================================
+        // UC5.4. Hệ thống kiểm tra và quản lý thời gian hiệu lực của các vật phẩm (buff) mà Bomber đang sở hữu.
+        // Nếu vật phẩm hết thời gian, hệ thống tự động thu hồi hiệu ứng.
+        // =====================================
+        if (passWallTimer > 0) { passWallTimer--; if (passWallTimer == 0) passWall = false; }
+        if (passBombTimer > 0) { passBombTimer--; if (passBombTimer == 0) passBomb = false; }
+        if (shieldTimer > 0) { shieldTimer--; if (shieldTimer == 0) hasShield = false; }
+        if (flamePassTimer > 0) { flamePassTimer--; if (flamePassTimer == 0) isFlamePass = false; }
+        if (pierceBombTimer > 0) { pierceBombTimer--; if (pierceBombTimer == 0) hasPierceBomb = false; }
 
         // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
         super.update();
+    }
+
+    @Override
+    public void render(GraphicsContext gc) {
+        // =====================================
+        // Áp dụng hiệu ứng nhấp nháy cho trạng thái Bất tử (UC5.3a.5)
+        // =====================================
+        if (immortal > 0 && immortal % 10 < 5) {
+            return;
+        }
+        super.render(gc);
     }
 }
