@@ -147,11 +147,10 @@ public class Flame extends AnimateEntity {
 
     /**
      * UC3.8a.5: [LUỒNG NGOẠI LỆ] Thiêu rụi vật phẩm đang hiển thị trên bản đồ.
-     * Ở màn chơi số 1: xóa vĩnh viễn vật phẩm đó khỏi trò chơi.
-     * (Được yêu cầu áp dụng thử ở màn 1, sau này sẽ dùng cho màn 2)
+     * Ở màn chơi số 1 và 2: xóa vĩnh viễn vật phẩm đó khỏi trò chơi.
      */
     public void destroyItemWhenBombExplodes(Entity entity) {
-        if (Map.getLevelNumber() == 1) {
+        if (Map.getLevelNumber() <= 2) {
             entity.remove();
             if (entity instanceof Item) {
                 ((Item) entity).delete();

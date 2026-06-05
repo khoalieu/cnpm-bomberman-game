@@ -322,14 +322,14 @@ public class Bomber extends Character {
                 // ==============================
                 // ==============================
                 // UC3.9a.2: [LUỒNG NGOẠI LỆ] Nếu người chơi đã sở hữu kỹ năng Đá bom (hasKickAbility == true)
-                //           VÀ đang ở màn chơi số 1,
+                //           VÀ đang ở màn chơi <= 2,
                 //           hệ thống làm quả bom trượt đi theo hướng di chuyển của người chơi (bomb.kick()).
                 // ==============================
-                if (hasKickAbility && Map.getLevelNumber() == 1) {
+                if (hasKickAbility && Map.getLevelNumber() <= 2) {
                     bomb.kick(this.direction);
                 }
                 // ==============================
-                // UC3.9a.3: [LUỒNG NGOẠI LỆ] Nếu không đủ điều kiện trên (không có KickItem hoặc không phải màn 1),
+                // UC3.9a.3: [LUỒNG NGOẠI LỆ] Nếu không đủ điều kiện trên,
                 //           quả bom đóng vai trò vật cản vững chắc – nhân vật không thể đi xuyên qua.
                 //           (Va chạm do super.checkCollision() và isCollision đã xử lý)
                 // ==============================
