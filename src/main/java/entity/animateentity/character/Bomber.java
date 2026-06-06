@@ -393,12 +393,7 @@ public class Bomber extends Character {
         // UC5.4. Hệ thống kiểm tra và quản lý thời gian hiệu lực của các vật phẩm (buff) mà Bomber đang sở hữu.
         // Nếu vật phẩm hết thời gian, hệ thống tự động thu hồi hiệu ứng.
         // =====================================
-        if (passWallTimer > 0) { passWallTimer--; if (passWallTimer == 0) passWall = false; }
-        if (passBombTimer > 0) { passBombTimer--; if (passBombTimer == 0) passBomb = false; }
-        if (shieldTimer > 0) { shieldTimer--; if (shieldTimer == 0) hasShield = false; }
-        if (flamePassTimer > 0) { flamePassTimer--; if (flamePassTimer == 0) isFlamePass = false; }
-        if (pierceBombTimer > 0) { pierceBombTimer--; if (pierceBombTimer == 0) hasPierceBomb = false; }
-        if (kickAbilityTimer > 0) { kickAbilityTimer--; if (kickAbilityTimer == 0) hasKickAbility = false; }
+        updateBuffTimersForTestableLogic();
 
         // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
         super.update();
@@ -413,5 +408,37 @@ public class Bomber extends Character {
             return;
         }
         super.render(gc);
+    }
+
+    public void updateBuffTimersForTestableLogic() {
+        if (passWallTimer > 0) {
+            passWallTimer--;
+            if (passWallTimer == 0) passWall = false;
+        }
+
+        if (passBombTimer > 0) {
+            passBombTimer--;
+            if (passBombTimer == 0) passBomb = false;
+        }
+
+        if (shieldTimer > 0) {
+            shieldTimer--;
+            if (shieldTimer == 0) hasShield = false;
+        }
+
+        if (flamePassTimer > 0) {
+            flamePassTimer--;
+            if (flamePassTimer == 0) isFlamePass = false;
+        }
+
+        if (pierceBombTimer > 0) {
+            pierceBombTimer--;
+            if (pierceBombTimer == 0) hasPierceBomb = false;
+        }
+
+        if (kickAbilityTimer > 0) {
+            kickAbilityTimer--;
+            if (kickAbilityTimer == 0) hasKickAbility = false;
+        }
     }
 }
