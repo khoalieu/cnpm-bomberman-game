@@ -28,6 +28,7 @@ public class Bomber extends Character {
     public boolean isFlamePass = false;
     public int flamePassTimer = 0;
     public boolean hasKickAbility = false;
+    public int kickAbilityTimer = 0;
     public boolean hasPierceBomb = false;
     public int pierceBombTimer = 0;
 
@@ -284,6 +285,7 @@ public class Bomber extends Character {
                     // Từ đây, khi húc vào bom sẽ đá bom trượt đi theo hướng di chuyển.
                     // ==============================
                     hasKickAbility = true;
+                    kickAbilityTimer = KickItem.EFFECT_DURATION; // 20 giây = 1200 frame
                 } else if (item instanceof PierceBombItem) {
                     // ==============================
                     // UC3.4 (Điều kiện): Người chơi nhặt PierceBombItem → kích hoạt cờ hasPierceBomb = true.
@@ -396,6 +398,7 @@ public class Bomber extends Character {
         if (shieldTimer > 0) { shieldTimer--; if (shieldTimer == 0) hasShield = false; }
         if (flamePassTimer > 0) { flamePassTimer--; if (flamePassTimer == 0) isFlamePass = false; }
         if (pierceBombTimer > 0) { pierceBombTimer--; if (pierceBombTimer == 0) hasPierceBomb = false; }
+        if (kickAbilityTimer > 0) { kickAbilityTimer--; if (kickAbilityTimer == 0) hasKickAbility = false; }
 
         // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
         super.update();

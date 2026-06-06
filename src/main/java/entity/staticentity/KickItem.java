@@ -4,6 +4,9 @@ import graphics.Sprite;
 import javafx.scene.image.Image;
 
 public class KickItem extends Item {
+    /** Thời gian hiệu lực: 20 giây * 60 frame/giây = 1200 frame */
+    public static final int EFFECT_DURATION = 20 * 60;
+
     private static Image customImage;
     
     static {

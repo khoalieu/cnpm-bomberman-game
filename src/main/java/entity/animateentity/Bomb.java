@@ -208,13 +208,15 @@ public class Bomb extends AnimateEntity {
         entity.Entity tile = map.getTile(x, y);
         if (tile instanceof Grass) return; // Ô trống → tia lửa lan tiếp, không cần xử lý
 
+        boolean wasBlock = tile.isBlock();
+
         // UC3.8: Gọi tương tác phụ (phá Brick, mở khóa Item ẩn, lộ Portal,...)
         centerFlame.interactWith(tile);
 
         if (tile instanceof entity.staticentity.Wall) {
             // Tường cứng (Wall): LUÔN chặn – dù là bom thường hay bom xuyên thấu
             stopFlame(dir);
-        } else if (tile instanceof entity.animateentity.Brick) {
+        } else if (tile instanceof entity.animateentity.Brick || (wasBlock && (tile instanceof entity.staticentity.Item || tile instanceof entity.staticentity.Portal))) {
             // ==============================
             // UC3.7a.1: Gạch mềm (Brick):
             //   - Bom thường (isPierce == false): chặn tia lửa, gạch bị phá.
@@ -226,7 +228,9 @@ public class Bomb extends AnimateEntity {
             // isPierce == true: không gọi stopFlame() → tia lửa xuyên qua gạch đã bị phá
         } else {
             // Vật cản khác (bom đang đặt, vật phẩm block, ...): chặn lại
-            stopFlame(dir);
+            if (tile.isBlock()) {
+                stopFlame(dir);
+            }
         }
     }
 
