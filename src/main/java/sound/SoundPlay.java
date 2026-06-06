@@ -3,7 +3,7 @@ package sound;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import java.io.File;
+import java.net.URL;
 
 public class SoundPlay {
 
@@ -14,45 +14,53 @@ public class SoundPlay {
         this.path = path;
 
         try {
-            File file = new File(path);
+            // SỬA LỖI WINDOWS BẰNG CÁCH REPLACE DẤU \
+            String resourcePath = path.replace("\\", "/");
+            resourcePath = resourcePath.replace("src/main/resources", "");
+            if (!resourcePath.startsWith("/")) {
+                resourcePath = "/" + resourcePath;
+            }
 
-            AudioInputStream audioInputStream =
-                    AudioSystem.getAudioInputStream(file.getAbsoluteFile());
+            // Lấy URL của file âm thanh nằm TỪ TRONG file .jar
+            URL url = getClass().getResource(resourcePath);
 
+            if (url == null) {
+                System.err.println("Lỗi: Không tìm thấy file âm thanh tại " + resourcePath);
+                return;
+            }
+
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(url);
             clip = AudioSystem.getClip();
             clip.open(audioInputStream);
 
         } catch (Exception e) {
-            System.out.println(e);
+            System.err.println("Lỗi khi load âm thanh " + path + ": " + e.getMessage());
         }
     }
 
     public void play() {
-
-        // UC5.12a - Mute toàn bộ âm thanh
-        if (Sound.isMuted()) {
+        if (Sound.isMuted() || clip == null) {
             return;
         }
-
         clip.setFramePosition(0);
         clip.start();
     }
 
     public void loop() {
-
-        if (Sound.isMuted()) {
+        if (Sound.isMuted() || clip == null) {
             return;
         }
-
         clip.loop(Clip.LOOP_CONTINUOUSLY);
     }
 
     public void stop() {
-        clip.stop();
+        if (clip != null) {
+            clip.stop();
+        }
     }
 
     public boolean isFinish() {
-        return clip.getMicrosecondLength()
-                == clip.getMicrosecondPosition();
+        if (clip == null) return true;
+        return clip.getMicrosecondLength() == clip.getMicrosecondPosition();
     }
 }

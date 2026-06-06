@@ -81,61 +81,63 @@ public class Map {
 
     // [UC1.2 - Bước 1.6]: Yêu cầu khởi tạo map (Đọc file txt từ Variables)
     public void createMap(String mapPath) throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File(mapPath));
-        topInfoImage = new Image("/top_info.png");
+        // SỬA LỖI WINDOWS: Đổi toàn bộ dấu \ thành / trước khi xử lý chuỗi
+        String resourcePath = mapPath.replace("\\", "/");
+        resourcePath = resourcePath.replace("src/main/resources", "");
+        if (!resourcePath.startsWith("/")) {
+            resourcePath = "/" + resourcePath;
+        }
+
+        // Đọc file map từ trong lõi .jar bằng InputStream
+        java.io.InputStream is = getClass().getResourceAsStream(resourcePath);
+        if (is == null) {
+            System.err.println("Không tìm thấy file Map tại: " + resourcePath);
+            return;
+        }
+
+        Scanner scanner = new Scanner(is);
+
+        // Nâng cấp: Đọc ảnh top_info phòng trường hợp nó nằm trong thư mục textures
+        java.io.InputStream imgStream = getClass().getResourceAsStream("/top_info.png");
+        if (imgStream == null) {
+            imgStream = getClass().getResourceAsStream("/textures/top_info.png");
+        }
+        if (imgStream != null) {
+            topInfoImage = new Image(imgStream);
+        }
+
         String _string = scanner.nextLine();
         levelNumber = _string.charAt(0) - '0';
         resetEntities();
         revival = false;
 
-        // Danh sách lưu các tọa độ ô Cỏ trống để có thể đặt vật phẩm ngẫu nhiên
         java.util.ArrayList<int[]> grassPositions = new java.util.ArrayList<>();
-
-        // uc4+ // UC4.6a.5 - Trạng thái Enraged chỉ được kích hoạt một lần trong mỗi
-        // màn chơi
         lastEnemyEnragedTriggered = false;
 
-        // [UC1.4]: Vòng lặp duyệt từng dòng (i) và từng ký tự (j) trong ma trận
         for (int i = 0; i < HEIGHT; i++) {
             String string = scanner.hasNextLine() ? scanner.nextLine() : "";
             for (int j = 0; j < WIDTH; j++) {
                 char c = (j < string.length()) ? string.charAt(j) : ' ';
 
-                // Khôi phục tường biên an toàn nếu file text bị thiếu hụt khoảng trắng ở cuối
                 if (j == WIDTH - 1 || i == 0 || i == HEIGHT - 1 || j == 0) {
                     c = '#';
                 }
 
-                // -------------------------------------------------------------
-                // [TỐI ƯU CHO LEVEL 2]: Tách biệt logic nhận diện ô cỏ trống để rải item ngẫu
-                // nhiên
-                // -------------------------------------------------------------
                 if (levelNumber == 2) {
-                    // Nếu là ô trống HOẶC là ô chứa vật phẩm cố định của Lvl 1 (w, q, m, i, f, b,
-                    // s)
                     if (c == ' ' || c == 'w' || c == 'q' || c == 'm' || c == 'i' || c == 'f' || c == 'b' || c == 's' || c == 'k' || c == 'c') {
-                        // Thu thập tọa độ ô này để chuẩn bị random vật phẩm
                         if (!((i == 1 && j == 1) || (i == 1 && j == 2) || (i == 2 && j == 1))) {
-                            grassPositions.add(new int[] { i, j });
+                            grassPositions.add(new int[]{i, j});
                         }
-                        // Ép ký tự c thành ô cỏ trống ' ' ĐÚNG NGHĨA
                         c = ' ';
                     }
                 }
 
-                // [UC1.4 - Bước 1.6.2 & 1.6.3]: Tạo StaticEntity (Wall, Grass...)
                 tiles[i][j] = StaticTexture.setStatic(c, i, j);
 
-                // ==============================
-                // UC1.5: Lưu tất cả các đối tượng vừa tạo vào danh sách quản lý đồ họa
-                // ==============================
-                //[UC1.4b - Ký tự vật phẩm không hợp lệ / Thiếu kết cấu]
                 if (tiles[i][j] == null) {
                     tiles[i][j] = StaticTexture.setStatic(' ', i, j);
                 }
 
-                // [UC1.4a]: Nếu ký tự tương ứng là Vật phẩm (Item), hệ thống nhận diện thực thể
-                // Item
                 if (tiles[i][j] instanceof Item) {
                     items.add((Item) tiles[i][j]);
                 }
@@ -143,10 +145,7 @@ public class Map {
                     tiles[i][j] = BrickTexture.setBrick(i, j);
                 }
 
-                // [UC1.4 - Bước 1.6.4 & 1.6.5]: Tạo AnimateEntity (Bomber, Enemy...)
                 Character character = CharacterTexture.setCharacter(c, i, j);
-                // [UC1.4 - Bước 1.6.6]: Phân loại và lưu vào các danh sách quản lý (player,
-                // enemies)
                 if (character != null) {
                     if (c == 'p') {
                         player = (Bomber) character;
@@ -157,13 +156,8 @@ public class Map {
             }
         }
 
-        // =========================================================================
-        // PHÁT TRIỂN LEVEL 2: KHỞI TẠO VẬT PHẨM NGẪU NHIÊN TRÊN CÁC Ô CỎ TRỐNG
-        // =========================================================================
-
-        //[UC1.5a] Không đủ vị trí ô cỏ trống ở Level 2
         if (levelNumber == 2 && !grassPositions.isEmpty()) {
-            char[] level2Items = { 'b', 'f', 's', 'w', 'q', 'm', 'i', 'k', 'c' };
+            char[] level2Items = {'b', 'f', 's', 'w', 'q', 'm', 'i', 'k', 'c'};
             java.util.Collections.shuffle(grassPositions);
 
             int itemsToSpawn = Math.min(level2Items.length, grassPositions.size());
@@ -196,11 +190,21 @@ public class Map {
         ArrayList<Item> removedItems = new ArrayList<>();
         ArrayList<Score> removedScores = new ArrayList<>();
 
-        scores.forEach(score -> { if (score.isRemoved()) removedScores.add(score); });
-        items.forEach(item -> { if (item.isRemoved()) removedItems.add(item); });
-        enemies.forEach(enemy -> { if (enemy.isRemoved()) removedEnemies.add(enemy); });
-        bombs.forEach(bomb -> { if (bomb.isRemoved()) removedBombs.add(bomb); });
-        flames.forEach(flame -> { if (flame.isRemoved()) removedFlames.add(flame); });
+        scores.forEach(score -> {
+            if (score.isRemoved()) removedScores.add(score);
+        });
+        items.forEach(item -> {
+            if (item.isRemoved()) removedItems.add(item);
+        });
+        enemies.forEach(enemy -> {
+            if (enemy.isRemoved()) removedEnemies.add(enemy);
+        });
+        bombs.forEach(bomb -> {
+            if (bomb.isRemoved()) removedBombs.add(bomb);
+        });
+        flames.forEach(flame -> {
+            if (flame.isRemoved()) removedFlames.add(flame);
+        });
 
         if (player.isRemoved()) player = null;
 
@@ -283,14 +287,16 @@ public class Map {
         graphicsContext.fillText("Score: " + String.valueOf(MainGame.getScore()), 0.6 * SCALED_SIZE, SCALED_SIZE * 0.8);
         if (MainGame.getScore() > Menu.getHighscore()) {
             try {
-                PrintWriter writer = new PrintWriter("src/main/resources/menu/highscore.txt");
+                // SỬA CÁCH LƯU ĐIỂM: Lưu ra file highscore.txt ở bên ngoài ứng dụng (nằm cạnh file .exe)
+                File scoreFile = new File("highscore.txt");
+                PrintWriter writer = new PrintWriter(scoreFile);
                 writer.print("");
                 writer.print(MainGame.getScore());
                 writer.close();
             } catch (FileNotFoundException e) {
                 // [UC1.2a - Bước 2.1]: Phát hiện FileNotFoundException (Không tìm thấy file)
                 // [UC1.2a - Bước 2.2]: Ghi nhật ký lỗi (log) ra Console
-                System.out.println(e);
+                System.out.println("Lỗi lưu điểm: " + e.getMessage());
             }
         }
         if (time != 0) {
