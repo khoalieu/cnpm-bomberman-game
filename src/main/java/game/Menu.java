@@ -30,9 +30,10 @@ public class Menu {
     private boolean start = false;
 
     public void createMenu() {
-        newGame_Start = new Image("/menu/GameMenu_Start.png");
-        newGame_Exit = new Image("/menu/GameMenu_Exit.png");
-        Background = new Image("/menu/Background.png");
+        // SỬA CÁCH LOAD ẢNH BẰNG getResourceAsStream cho an toàn 100% khi đóng gói
+        newGame_Start = new Image(getClass().getResourceAsStream("/menu/GameMenu_Start.png"));
+        newGame_Exit = new Image(getClass().getResourceAsStream("/menu/GameMenu_Exit.png"));
+        Background = new Image(getClass().getResourceAsStream("/menu/Background.png"));
     }
 
     public void renderMenu(GraphicsContext graphicsContext) {
@@ -43,13 +44,22 @@ public class Menu {
             graphicsContext.drawImage(newGame_Exit, 0, 0);
         }
         try {
-            high_score = new File("src/main/resources/menu/highscore.txt");
-            scanner = new Scanner(high_score);
-            highscore = scanner.nextInt();
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            System.out.println(e);
+            // SỬA CÁCH ĐỌC FILE HIGHSCORE: Đọc file "highscore.txt" ở bên ngoài (cạnh file .exe)
+            high_score = new File("highscore.txt");
+            if (high_score.exists()) {
+                scanner = new Scanner(high_score);
+                if (scanner.hasNextInt()) {
+                    highscore = scanner.nextInt();
+                }
+                scanner.close();
+            } else {
+                highscore = 0; // Lần đầu chơi chưa có file thì mặc định điểm bằng 0
+            }
+        } catch (Exception e) {
+            highscore = 0;
+            System.out.println("Lỗi load điểm: " + e.getMessage());
         }
+
         graphicsContext.fillText("Start", SCALED_SIZE * 6.7, SCALED_SIZE * 10.93);
         graphicsContext.fillText("Exit", SCALED_SIZE * 7.14, SCALED_SIZE * 11.95);
         graphicsContext.fillText("Highscore: " + String.valueOf(highscore), SCALED_SIZE * 4.5, SCALED_SIZE * 12.95);
@@ -67,7 +77,9 @@ public class Menu {
         // [UC1.1 - Bước 1.4]: Trả về DIRECTION.DESTROYED (Chọn Start) -> Cập nhật trạng thái start = true
         if (direction == DESTROYED && state == 1) {
             start = true;
-            Sound.menu_sound.stop();
+            if(Sound.menu_sound != null) {
+                Sound.menu_sound.stop();
+            }
         }
         if (direction == DESTROYED && state == 0) {
             Platform.exit();
