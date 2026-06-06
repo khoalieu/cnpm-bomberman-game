@@ -197,4 +197,5 @@ public abstract class Character extends AnimateEntity {
     }
 
     public abstract void setDirection();
+    
 }
