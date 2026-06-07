@@ -10,6 +10,7 @@ import input.KeyInput;
 import sound.Sound;
 import texture.BombTexture;
 import map.Map;
+import javafx.scene.canvas.GraphicsContext;
 
 import static graphics.Sprite.*;
 import static variables.Variables.DIRECTION.*;
@@ -27,8 +28,11 @@ public class Bomber extends Character {
     public boolean isFlamePass = false;
     public int flamePassTimer = 0;
     public boolean hasKickAbility = false;
+    public int kickAbilityTimer = 0;
     public boolean hasPierceBomb = false;
     public int pierceBombTimer = 0;
+
+    private int immortal = 0;
 
     public Bomber(int x, int y, Sprite sprite, KeyInput keyInput) {
         super(x, y, sprite);
@@ -41,7 +45,7 @@ public class Bomber extends Character {
     }
 
     @Override
-    protected boolean canPass(Entity entity) {
+    public boolean canPass(Entity entity) {
         // =============================================================
         // UC2.4a.1. Nếu tại tọa độ tiếp theo có va chạm trực diện với vật cản cứng (Wall, Brick, Bomb),
         // hệ thống kiểm tra cờ trạng thái xuyên thấu của nhân vật.
@@ -200,6 +204,10 @@ public class Bomber extends Character {
         // =============================================================
         super.checkCollision();
         handleImmortalState();
+
+        // =====================================
+        // UC5.3. Hệ thống liên tục kiểm tra trạng thái của nhân vật Bomber.
+        // =====================================
         handleEnemyCollision();
         handleItemCollision();
         handleBombBlocking();
@@ -277,6 +285,7 @@ public class Bomber extends Character {
                     // Từ đây, khi húc vào bom sẽ đá bom trượt đi theo hướng di chuyển.
                     // ==============================
                     hasKickAbility = true;
+                    kickAbilityTimer = KickItem.EFFECT_DURATION; // 20 giây = 1200 frame
                 } else if (item instanceof PierceBombItem) {
                     // ==============================
                     // UC3.4 (Điều kiện): Người chơi nhặt PierceBombItem → kích hoạt cờ hasPierceBomb = true.
@@ -315,14 +324,14 @@ public class Bomber extends Character {
                 // ==============================
                 // ==============================
                 // UC3.9a.2: [LUỒNG NGOẠI LỆ] Nếu người chơi đã sở hữu kỹ năng Đá bom (hasKickAbility == true)
-                //           VÀ đang ở màn chơi số 1,
+                //           VÀ đang ở màn chơi <= 2,
                 //           hệ thống làm quả bom trượt đi theo hướng di chuyển của người chơi (bomb.kick()).
                 // ==============================
-                if (hasKickAbility && Map.getLevelNumber() == 1) {
+                if (hasKickAbility && Map.getLevelNumber() <= 2) {
                     bomb.kick(this.direction);
                 }
                 // ==============================
-                // UC3.9a.3: [LUỒNG NGOẠI LỆ] Nếu không đủ điều kiện trên (không có KickItem hoặc không phải màn 1),
+                // UC3.9a.3: [LUỒNG NGOẠI LỆ] Nếu không đủ điều kiện trên,
                 //           quả bom đóng vai trò vật cản vững chắc – nhân vật không thể đi xuyên qua.
                 //           (Va chạm do super.checkCollision() và isCollision đã xử lý)
                 // ==============================
@@ -361,8 +370,10 @@ public class Bomber extends Character {
         immortal = 100;
         //UC5.3a.3. Hệ thống kích hoạt trạng thái hồi sinh
         map.setRevival(true);
-        //UC5.3a.4. Bomber được đưa về vị trí bắt đầu
+
+        // UC5.3a.4. Bomber được đưa về vị trí bắt đầu
         setPosition(SCALED_SIZE, SCALED_SIZE);
+
         destroyed = false;
         direction = NONE;
         setSprite(Sprite.PLAYER_DOWN[0]);
@@ -378,28 +389,56 @@ public class Bomber extends Character {
         // =============================================================
         // UC2.4b.4 (Bổ sung): Hệ thống đếm ngược thời gian hiệu lực của Vật phẩm và tự động gỡ bỏ buff khi hết hạn.
         // =============================================================
+        // =====================================
+        // UC5.4. Hệ thống kiểm tra và quản lý thời gian hiệu lực của các vật phẩm (buff) mà Bomber đang sở hữu.
+        // Nếu vật phẩm hết thời gian, hệ thống tự động thu hồi hiệu ứng.
+        // =====================================
+        updateBuffTimersForTestableLogic();
+
+        // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
+        super.update();
+    }
+
+    @Override
+    public void render(GraphicsContext gc) {
+        // =====================================
+        // Áp dụng hiệu ứng nhấp nháy cho trạng thái Bất tử (UC5.3a.5)
+        // =====================================
+        if (immortal > 0 && immortal % 10 < 5) {
+            return;
+        }
+        super.render(gc);
+    }
+
+    public void updateBuffTimersForTestableLogic() {
         if (passWallTimer > 0) {
             passWallTimer--;
             if (passWallTimer == 0) passWall = false;
         }
+
         if (passBombTimer > 0) {
             passBombTimer--;
             if (passBombTimer == 0) passBomb = false;
         }
+
         if (shieldTimer > 0) {
             shieldTimer--;
             if (shieldTimer == 0) hasShield = false;
         }
+
         if (flamePassTimer > 0) {
             flamePassTimer--;
             if (flamePassTimer == 0) isFlamePass = false;
         }
+
         if (pierceBombTimer > 0) {
             pierceBombTimer--;
-            if (pierceBombTimer == 0) hasPierceBomb = false; // Hết 20s, mất hiệu lực
+            if (pierceBombTimer == 0) hasPierceBomb = false;
         }
 
-        // Gọi lại hàm update của class cha (Character) để Bomber vẫn di chuyển và xét va chạm bình thường
-        super.update();
+        if (kickAbilityTimer > 0) {
+            kickAbilityTimer--;
+            if (kickAbilityTimer == 0) hasKickAbility = false;
+        }
     }
 }

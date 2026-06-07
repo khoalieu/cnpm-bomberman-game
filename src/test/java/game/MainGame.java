@@ -1,7 +1,6 @@
 package game;
 
 import input.KeyInput;
-import sound.Sound;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -13,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import map.Map;
+import sound.Sound;
 
 import java.io.FileNotFoundException;
 
@@ -114,7 +114,7 @@ public class MainGame extends Application {
                             // ==========================================================
                             // TC5.4a: Kích hoạt dọn dẹp, làm sạch và tải mới cấu trúc ma trận map
                             // ==========================================================
-                            map.createMap(MAP_URLS[0]);
+                            map.createMap(MAP_URLS[1]);
                             map.resetNumber();
                         } catch (FileNotFoundException e) {
                             // ==============================
