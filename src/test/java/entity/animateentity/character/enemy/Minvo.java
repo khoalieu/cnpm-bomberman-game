@@ -9,7 +9,6 @@ import variables.Variables.DIRECTION;
 
 import static graphics.Sprite.*;
 import static variables.Variables.DIRECTION.*;
-import static variables.Variables.DIRECTION.RIGHT;
 import static variables.Variables.HEIGHT;
 import static variables.Variables.WIDTH;
 
@@ -106,6 +105,6 @@ public class Minvo extends Enemy {
         // =============================================================
         // UC4.5a.3: Khi bị tiêu diệt hoàn toàn, thực thể bị xóa khỏi bộ nhớ
         // =============================================================
-        this.remove();
+          super.delete();
     }
 }

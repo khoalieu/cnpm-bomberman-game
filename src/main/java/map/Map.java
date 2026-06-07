@@ -234,31 +234,27 @@ public class Map {
     }
 
     // uc4+
-    // ========================================================================
-    // UC4.6a - Kích hoạt trạng thái tức giận khi còn một quái vật cuối cùng
-    // ========================================================================
-    private void triggerLastEnemyEnragedIfNeeded() {
-        // UC4.6a.5 - Trạng thái Enraged chỉ được kích hoạt một lần trong mỗi màn chơi
-        // nhằm tránh việc quái vật bị tăng mạng hoặc tăng tốc nhiều lần.
-        if (lastEnemyEnragedTriggered)
-            return;
-        // UC4.6a.1 - Sau khi hệ thống xử lý xóa các quái vật đã bị tiêu diệt khỏi danh
-        // sách quản lý,
-        // hệ thống kiểm tra số lượng quái vật còn tồn tại trên bản đồ.
-        if (enemies.size() == 1) {
-            Enemy lastEnemy = enemies.get(0);
+// ========================================================================
+// UC4.6a - Kích hoạt trạng thái tức giận khi còn một quái vật cuối cùng
+// ========================================================================
+private void triggerLastEnemyEnragedIfNeeded() {
+    // UC4.6a.1 - Sau khi hệ thống xử lý xóa các quái vật đã bị tiêu diệt khỏi danh sách quản lý,
+    // hệ thống kiểm tra số lượng quái vật còn tồn tại trên bản đồ.
+    if (enemies.size() != 1) return;
 
-            // UC4.6a.2 - Nếu số lượng quái vật còn lại bằng 1 và trạng thái tức giận chưa
-            // từng
-            // được kích hoạt trong màn chơi hiện tại, hệ thống xác định quái vật cuối cùng
-            // là đối tượng được tăng cường.
-            if (!lastEnemy.isDestroyed() && !lastEnemy.isRemoved()) {
-                lastEnemy.becomeEnraged();
-                // UC4.6a.5 - Trạng thái Enraged chỉ được kích hoạt một lần trong mỗi màn chơi
-                lastEnemyEnragedTriggered = true;
-            }
-        }
-    }
+    Enemy lastEnemy = enemies.get(0);
+
+    // UC4.6a.2 - Nếu số lượng quái vật còn lại bằng 1 và quái vật cuối cùng còn hợp lệ,
+    // hệ thống xác định quái vật cuối cùng là đối tượng được tăng cường.
+    if (lastEnemy.isDestroyed() || lastEnemy.isRemoved()) return;
+
+    // UC4.6a.5 - Nếu quái vật này đã Enraged rồi thì không kích hoạt lại,
+    // nhằm tránh việc tăng mạng hoặc tăng tốc nhiều lần.
+    if (lastEnemy.isEnraged()) return;
+
+    // UC4.6a.3 - UC4.6a.4 - Chuyển quái vật cuối cùng sang trạng thái Enraged
+    lastEnemy.becomeEnraged();
+}
 
     public void updateMap() {
         if (revival) return;
