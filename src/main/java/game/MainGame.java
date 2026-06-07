@@ -109,7 +109,7 @@ public class MainGame extends Application {
                         if (countdown == 160) {
                             Sound.level_start.play();
                             try {
-                                map.createMap(MAP_URLS[0]); // Đọc Level2.txt từ chỉ mục 0
+                                map.createMap(MAP_URLS[1]); // Đọc Level2.txt từ chỉ mục 0
                                 map.resetNumber();
                             } catch (FileNotFoundException e) {
                                 System.out.println(e);
