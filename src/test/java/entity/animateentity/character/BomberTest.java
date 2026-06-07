@@ -141,4 +141,42 @@ public class BomberTest {
         // Kết quả mong đợi
         assertTrue(bomb.getPixelX() > initialBombX, "Quả bom phải trượt đi (Pixel X tăng) sau khi Bomber húc vào");
     }
+
+    @Test
+    @DisplayName("TC3.6: Kích hoạt kỹ năng Bom xuyên thấu (Pierce Bomb)")
+    public void testPierceBomb_TC3_6() {
+        // Chuẩn bị 1: Cấp kỹ năng Bom xuyên thấu cho Bomber
+        bomber.hasPierceBomb = true;
+
+        // Chuẩn bị 2: Tăng độ dài tia lửa (flameLength) lên 2 để lửa có thể lan tới viên gạch thứ hai
+        entity.animateentity.Flame.flameLength = 2;
+
+        // Chuẩn bị 3: Đặt 2 viên gạch mềm liên tiếp nhau trên trục X (ô 2,1 và ô 3,1)
+        Brick brick1 = new Brick(2, 1, null);
+        Brick brick2 = new Brick(3, 1, null);
+        gameMap.getTiles()[1][2] = brick1; // Lưới tọa độ là mảng[Y][X]
+        gameMap.getTiles()[1][3] = brick2;
+
+        // Hành động 1: Bomber đặt bom tại vị trí của mình (ô 1,1 -> pixel 32,32)
+        // Việc dùng placeBombAt giúp kiểm tra luôn logic truyền cờ (flag) từ Bomber sang Bomb
+        bomber.placeBombAt(32, 32);
+
+        // Lấy quả bom vừa đặt ra và ép thời gian nổ về 1 frame
+        Bomb bomb = gameMap.getBombs().get(0);
+        bomb.setTimetoExplode(1);
+
+        // Hành động 2: Cập nhật vòng đời của bom
+        bomb.update(); // Khung hình 1: Giảm đếm ngược về 0
+        bomb.update(); // Khung hình 2: Kích nổ, sinh tia lửa và quét va chạm xuyên qua gạch
+
+        // Cập nhật va chạm của Flame (để chắc chắn các hàm tương tác được gọi)
+        if (gameMap.getFlames() != null) {
+            gameMap.getFlames().forEach(entity.animateentity.Flame::update);
+        }
+
+        // Kết quả mong đợi: CẢ HAI viên gạch đều phải bị phá hủy do tính năng xuyên thấu
+        assertTrue(brick1.isDestroyed(), "Viên gạch đầu tiên phải bị phá hủy khi trúng tia lửa");
+        assertTrue(brick2.isDestroyed(), "Viên gạch thứ 2 cũng phải bị phá hủy vì tia lửa xuyên qua viên thứ 1");
+    }
+
 }

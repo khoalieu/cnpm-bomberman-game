@@ -1,7 +1,7 @@
 package entity.animateentity.character.enemy;
 
-import entity.animateentity.character.Bomber;
 import entity.Entity;
+import entity.animateentity.character.Bomber;
 import entity.staticentity.Wall;
 import graphics.Sprite;
 import map.Map;
