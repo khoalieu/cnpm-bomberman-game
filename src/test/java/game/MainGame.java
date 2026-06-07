@@ -114,7 +114,7 @@ public class MainGame extends Application {
                             // ==========================================================
                             // TC5.4a: Kích hoạt dọn dẹp, làm sạch và tải mới cấu trúc ma trận map
                             // ==========================================================
-                            map.createMap(MAP_URLS[0]);
+                            map.createMap(MAP_URLS[1]);
                             map.resetNumber();
                         } catch (FileNotFoundException e) {
                             // ==============================

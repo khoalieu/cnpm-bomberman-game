@@ -5,6 +5,7 @@ import entity.animateentity.Bomb;
 import entity.animateentity.Brick;
 import entity.animateentity.character.Bomber;
 import graphics.Sprite;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,7 +21,9 @@ class BomberCanPassTest {
         return new Bomber(32, 32, dummySprite(), new FakeKeyInput(NONE));
     }
 
+    // Mã ca kiểm thử: TC2_DEV_12
     @Test
+    @DisplayName("TC2_DEV_12 - Bomber có thể đi qua gạch khi bật hiệu ứng đi xuyên tường")
     void canPass_ShouldReturnTrue_WhenEntityIsBrickAndPassWallIsEnabled() {
         Bomber bomber = createBomber();
         bomber.passWall = true;
@@ -32,7 +35,9 @@ class BomberCanPassTest {
         assertTrue(actual);
     }
 
+    // Mã ca kiểm thử: TC2_DEV_13
     @Test
+    @DisplayName("TC2_DEV_13 - Bomber không thể đi qua gạch khi tắt hiệu ứng đi xuyên tường")
     void canPass_ShouldReturnFalse_WhenEntityIsBrickAndPassWallIsDisabled() {
         Bomber bomber = createBomber();
         bomber.passWall = false;
@@ -44,7 +49,9 @@ class BomberCanPassTest {
         assertFalse(actual);
     }
 
+    // Mã ca kiểm thử: TC2_DEV_14
     @Test
+    @DisplayName("TC2_DEV_14 - Bomber có thể đi qua bom khi bật hiệu ứng đi xuyên bom")
     void canPass_ShouldReturnTrue_WhenEntityIsBombAndPassBombIsEnabled() {
         Bomber bomber = createBomber();
         bomber.passBomb = true;
@@ -56,7 +63,9 @@ class BomberCanPassTest {
         assertTrue(actual);
     }
 
+    // Mã ca kiểm thử: TC2_DEV_15
     @Test
+    @DisplayName("TC2_DEV_15 - Bomber không thể đi qua bom khi tắt hiệu ứng đi xuyên bom")
     void canPass_ShouldReturnFalse_WhenEntityIsBombAndPassBombIsDisabled() {
         Bomber bomber = createBomber();
         bomber.passBomb = false;
@@ -68,7 +77,9 @@ class BomberCanPassTest {
         assertFalse(actual);
     }
 
+    // Mã ca kiểm thử: TC2_DEV_16
     @Test
+    @DisplayName("TC2_DEV_16 - Bomber xử lý vật thể thường theo luật mặc định")
     void canPass_ShouldUseParentRule_WhenEntityIsNormalEntity() {
         Bomber bomber = createBomber();
 
@@ -84,8 +95,7 @@ class BomberCanPassTest {
 
         boolean actual = bomber.canPass(normalEntity);
 
-        // Tùy logic super.canPass(entity) của Character/Entity.
-        // Nếu mặc định vật thể thường không cho đi qua thì assertFalse.
+        // Theo logic mặc định của super.canPass(entity), vật thể thường không cho đi qua.
         assertFalse(actual);
     }
 }
