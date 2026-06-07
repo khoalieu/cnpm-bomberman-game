@@ -26,7 +26,7 @@ class FlameCollisionTest {
         try {
             Platform.startup(() -> {});
         } catch (IllegalStateException e) {
-            // Ignore if JavaFX already started
+            // Bỏ qua nếu JavaFX đã được khởi động trước đó
         }
     }
 
@@ -47,7 +47,7 @@ class FlameCollisionTest {
             e.printStackTrace();
         }
 
-        // Initialize grid to Grass to avoid NPE
+        // Khởi tạo bản đồ ô Cỏ để tránh lỗi NullPointerException
         for (int i = 0; i < variables.Variables.HEIGHT; i++) {
             for (int j = 0; j < variables.Variables.WIDTH; j++) {
                 gameMap.setTile(i, j, new Grass(j, i, Sprite.grass));
@@ -55,7 +55,7 @@ class FlameCollisionTest {
         }
 
         player = new Bomber(32, 32, Sprite.PLAYER_DOWN[0], new FakeKeyInput(NONE));
-        // Force Bomber reference in Map
+        // Ép tham chiếu Bomber vào Map để tránh lỗi NullPointerException
         try {
             java.lang.reflect.Field playerField = Map.class.getDeclaredField("player");
             playerField.setAccessible(true);
@@ -65,7 +65,7 @@ class FlameCollisionTest {
         }
 
         Flame.flameLength = 1;
-        // Level 1 by default
+        // Mặc định Level 1
         try {
             java.lang.reflect.Field levelField = Map.class.getDeclaredField("levelNumber");
             levelField.setAccessible(true);
@@ -91,7 +91,7 @@ class FlameCollisionTest {
 
     @Test
     void testFlameCollisionWithBrickRevealingItem() {
-        // Hidden item at (2, 3) - defaults to block=true
+        // Vật phẩm ẩn tại ô lưới (2, 3) - mặc định block = true
         SpeedItem item = new SpeedItem(2, 3, Sprite.BRICK[0]);
         gameMap.setTile(3, 2, item);
         gameMap.getItems().add(item);
@@ -102,7 +102,7 @@ class FlameCollisionTest {
 
         bomb.update();
 
-        // Under brick, the item block becomes false (revealed)
+        // Phía dưới gạch, block của vật phẩm trở thành false (lộ diện)
         assertFalse(item.isBlock(), "Vật phẩm ẩn phải được hiển thị (block = false) khi gạch bị phá");
     }
 
@@ -117,7 +117,7 @@ class FlameCollisionTest {
 
         bomb.update();
 
-        // Flame check collision
+        // Kiểm tra va chạm tia lửa
         gameMap.getFlames().forEach(Flame::checkCollison);
 
         assertTrue(enemy.isDestroyed(), "Quái vật chạm tia lửa phải bị tiêu diệt");
@@ -125,7 +125,7 @@ class FlameCollisionTest {
 
     @Test
     void testFlameCollisionWithPlayer() {
-        // Player is at grid (2, 3) -> pixel (64, 96)
+        // Người chơi tại ô lưới (2, 3) -> pixel (64, 96)
         player.setPosition(64, 96);
         player.hasShield = false;
         player.isFlamePass = false;
@@ -136,7 +136,7 @@ class FlameCollisionTest {
 
         bomb.update();
 
-        // Flame check collision
+        // Kiểm tra va chạm tia lửa
         gameMap.getFlames().forEach(Flame::checkCollison);
 
         assertTrue(player.isDestroyed(), "Người chơi không bất tử chạm tia lửa phải bị tiêu diệt");
@@ -144,9 +144,9 @@ class FlameCollisionTest {
 
     @Test
     void testFlameCollisionWithPlayerShielded() {
-        // Player is at grid (2, 3) -> pixel (64, 96)
+        // Người chơi tại ô lưới (2, 3) -> pixel (64, 96)
         player.setPosition(64, 96);
-        player.hasShield = true; // Shield active
+        player.hasShield = true; // Khiên chắn được kích hoạt
         int initialLife = player.getLife();
 
         Bomb bomb = new Bomb(2, 2, Sprite.BOMB[0]);
@@ -155,7 +155,7 @@ class FlameCollisionTest {
 
         bomb.update();
 
-        // Flame check collision
+        // Kiểm tra va chạm tia lửa
         gameMap.getFlames().forEach(Flame::checkCollison);
 
         assertFalse(player.isDestroyed(), "Người chơi bất tử (hasShield = true) chạm tia lửa không bị tiêu diệt");
@@ -174,7 +174,7 @@ class FlameCollisionTest {
         bomb1.setTimetoExplode(0);
         bomb1.update();
 
-        // bomb2 is forced to 0
+        // Quả bom thứ hai bị ép về 0 ngay lập tức (Nổ dây chuyền)
         try {
             java.lang.reflect.Field field = Bomb.class.getDeclaredField("timetoExplode");
             field.setAccessible(true);
@@ -187,9 +187,9 @@ class FlameCollisionTest {
 
     @Test
     void testFlameCollisionWithRevealedItem() {
-        // Revealed item at (2, 3)
+        // Vật phẩm đã lộ diện tại ô lưới (2, 3)
         SpeedItem item = new SpeedItem(2, 3, Sprite.powerup_speed);
-        item.setBlock(false); // Already revealed
+        item.setBlock(false); // Đã lộ diện
         gameMap.getItems().add(item);
         gameMap.setTile(3, 2, item);
 
@@ -199,15 +199,14 @@ class FlameCollisionTest {
 
         bomb.update();
 
-        // Flame check collision / interactWith
-        // Inside Flame.java, it checks:
+        // Kiểm tra va chạm tia lửa / tương tác với vật phẩm (interactWith)
+        // Bên trong Flame.java, nó thực hiện kiểm tra:
         // else if (entity instanceof Item) {
         //    if (!entity.isBlock()) {
         //        destroyItemWhenBombExplodes(entity);
         //    }
         // }
-        // destroyItemWhenBombExplodes calls entity.remove() and item.delete() if Map.getLevelNumber() <= 2.
-        // Let's verify:
+        // destroyItemWhenBombExplodes gọi entity.remove() và item.delete() nếu Map.getLevelNumber() <= 2.
         assertTrue(item.isRemoved(), "Ở Level 1/2, vật phẩm lộ diện khi chạm tia lửa phải bị thiêu rụi (remove)");
     }
 }

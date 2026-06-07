@@ -22,7 +22,7 @@ class BombKickTest {
         try {
             Platform.startup(() -> {});
         } catch (IllegalStateException e) {
-            // Ignore if JavaFX already started
+            // Bỏ qua nếu JavaFX đã được khởi động trước đó
         }
     }
 
@@ -40,7 +40,7 @@ class BombKickTest {
             e.printStackTrace();
         }
 
-        // Initialize grid to Grass to avoid NPE
+        // Khởi tạo bản đồ ô Cỏ để tránh lỗi NullPointerException
         for (int i = 0; i < variables.Variables.HEIGHT; i++) {
             for (int j = 0; j < variables.Variables.WIDTH; j++) {
                 gameMap.setTile(i, j, new Grass(j, i, Sprite.grass));
@@ -48,7 +48,7 @@ class BombKickTest {
         }
 
         player = new Bomber(32, 32, Sprite.PLAYER_DOWN[0], new FakeKeyInput(DIRECTION.NONE));
-        // Force Bomber reference in Map
+        // Ép tham chiếu Bomber vào Map để tránh lỗi NullPointerException
         try {
             java.lang.reflect.Field playerField = Map.class.getDeclaredField("player");
             playerField.setAccessible(true);
@@ -57,7 +57,7 @@ class BombKickTest {
             e.printStackTrace();
         }
 
-        // Level 1 by default
+        // Mặc định Level 1
         try {
             java.lang.reflect.Field levelField = Map.class.getDeclaredField("levelNumber");
             levelField.setAccessible(true);
@@ -69,24 +69,24 @@ class BombKickTest {
 
     @Test
     void testPlayerKickBombSlides() {
-        // Place a bomb at (2, 1) -> pixel (64, 32)
+        // Đặt quả bom tại ô lưới (2, 1) -> vị trí pixel (64, 32)
         Bomb bomb = new Bomb(2, 1, Sprite.BOMB[0]);
         gameMap.getBombs().add(bomb);
         bomb.setBlock(true);
 
-        // Player has Kick Ability
+        // Người chơi có khả năng đá bom (Kick Ability)
         player.hasKickAbility = true;
 
-        // Position player moving RIGHT into the bomb
-        player.setPosition(32 + 20, 32); // right next to bomb (bomb starts at 64)
+        // Thiết lập người chơi di chuyển sang hướng PHẢI tiến vào ô của bom
+        player.setPosition(32 + 20, 32); // Ngay cạnh quả bom (bom bắt đầu tại pixel 64)
         ((FakeKeyInput) player.keyInput).setDirection(DIRECTION.RIGHT);
         player.setDirection();
         player.setVelocity(2, 0);
 
-        // Call checkCollision, which internally calls handleBombBlocking
+        // Gọi checkCollision, gián tiếp kích hoạt hàm handleBombBlocking xử lý va chạm bom
         player.checkCollision();
 
-        // Verify that the bomb has isMoving = true
+        // Xác minh quả bom bắt đầu chuyển sang trạng thái di chuyển/trượt (isMoving = true)
         try {
             java.lang.reflect.Field isMovingField = Bomb.class.getDeclaredField("isMoving");
             isMovingField.setAccessible(true);
@@ -99,15 +99,15 @@ class BombKickTest {
 
     @Test
     void testPlayerKickBombBlocked() {
-        // Place a bomb at (2, 1) -> pixel (64, 32)
+        // Đặt quả bom tại ô lưới (2, 1) -> vị trí pixel (64, 32)
         Bomb bomb = new Bomb(2, 1, Sprite.BOMB[0]);
         gameMap.getBombs().add(bomb);
         bomb.setBlock(true);
 
-        // Player does NOT have Kick Ability
+        // Người chơi không có khả năng đá bom (hasKickAbility = false)
         player.hasKickAbility = false;
 
-        // Position player moving RIGHT into the bomb
+        // Thiết lập người chơi di chuyển sang hướng PHẢI tiến vào ô của bom
         player.setPosition(32 + 20, 32);
         ((FakeKeyInput) player.keyInput).setDirection(DIRECTION.RIGHT);
         player.setDirection();
@@ -115,7 +115,7 @@ class BombKickTest {
 
         player.checkCollision();
 
-        // Verify that the bomb remains stationary
+        // Xác minh quả bom vẫn đứng yên (isMoving = false)
         try {
             java.lang.reflect.Field isMovingField = Bomb.class.getDeclaredField("isMoving");
             isMovingField.setAccessible(true);

@@ -24,7 +24,7 @@ class BombPlacementTest {
         try {
             Platform.startup(() -> {});
         } catch (IllegalStateException e) {
-            // Ignore if JavaFX already started
+            // Bỏ qua nếu JavaFX đã được khởi động trước đó
         }
     }
 
@@ -43,7 +43,7 @@ class BombPlacementTest {
             e.printStackTrace();
         }
 
-        // Initialize grid to Grass to avoid NPE
+        // Khởi tạo bản đồ toàn bộ là ô Cỏ để tránh lỗi NullPointerException
         for (int i = 0; i < variables.Variables.HEIGHT; i++) {
             for (int j = 0; j < variables.Variables.WIDTH; j++) {
                 gameMap.setTile(i, j, new Grass(j, i, Sprite.grass));
@@ -56,7 +56,7 @@ class BombPlacementTest {
 
     @Test
     void testPlaceBombNormalFlow() {
-        // Player at pixel (32, 32) -> tile (1, 1)
+        // Người chơi ở vị trí pixel (32, 32) -> ô lưới (1, 1)
         bomber.placeBombAt(32, 32);
 
         assertEquals(1, gameMap.getBombs().size(), "Hệ thống phải khởi tạo đối tượng Bom tại vị trí của Bomber");
@@ -68,36 +68,36 @@ class BombPlacementTest {
 
     @Test
     void testPlaceBombExceedLimit() {
-        // First bomb placed
+        // Đặt quả bom đầu tiên
         bomber.placeBombAt(32, 32);
         assertEquals(1, gameMap.getBombs().size());
 
-        // Attempt to place second bomb at another place (64, 32) -> tile (2, 1)
+        // Thử đặt quả bom thứ hai tại vị trí khác (64, 32) -> ô lưới (2, 1)
         bomber.placeBombAt(64, 32);
         assertEquals(1, gameMap.getBombs().size(), "Hệ thống phải bỏ qua lệnh đặt bom thứ 2 do vượt quá giới hạn tối đa");
     }
 
     @Test
     void testPlaceBombInvalidPosition_OccupiedByBomb() {
-        // Place first bomb
+        // Đặt quả bom đầu tiên
         bomber.placeBombAt(32, 32);
         assertEquals(1, gameMap.getBombs().size());
 
-        // Set bomb limit to 2 so we can attempt to place second bomb
+        // Cấu hình giới hạn bom là 2 để chúng ta có thể thử đặt quả bom thứ hai
         Bomb.limit = 2;
 
-        // Try to place bomb at the same occupied tile
+        // Thử đặt bom tại cùng một ô lưới đã bị chiếm dụng bởi quả bom đầu tiên
         bomber.placeBombAt(32, 32);
         assertEquals(1, gameMap.getBombs().size(), "Không được phép đặt bom trùng vị trí với bom khác");
     }
 
     @Test
     void testPlaceBombInvalidPosition_OccupiedByEnemy() {
-        // Spawn an enemy at (2, 1) -> pixel (64, 32)
+        // Tạo một quái vật tại ô lưới (2, 1) -> pixel (64, 32)
         Balloom balloom = new Balloom(2, 1, Sprite.BALLOOM_LEFT[0]);
         gameMap.getEnemies().add(balloom);
 
-        // Move bomber to (64, 32) and try to place bomb
+        // Di chuyển bomber đến vị trí (64, 32) và thử đặt bom
         bomber.setPosition(64, 32);
         bomber.placeBombAt(64, 32);
 
@@ -106,10 +106,10 @@ class BombPlacementTest {
 
     @Test
     void testPlaceBombInvalidPosition_OccupiedByWall() {
-        // Set tile at (2, 1) to Wall
+        // Đặt một bức Tường cứng tại ô lưới (2, 1) -> pixel (64, 32)
         gameMap.setTile(1, 2, new Wall(2, 1, Sprite.wall));
 
-        // Move bomber to (64, 32) and try to place bomb
+        // Di chuyển bomber đến vị trí (64, 32) và thử đặt bom
         bomber.setPosition(64, 32);
         bomber.placeBombAt(64, 32);
 
@@ -118,7 +118,7 @@ class BombPlacementTest {
 
     @Test
     void testPlaceBombPierceAttribute() {
-        // Set pierce buff active
+        // Kích hoạt trạng thái buff xuyên thấu cho Bomber
         bomber.hasPierceBomb = true;
 
         bomber.placeBombAt(32, 32);

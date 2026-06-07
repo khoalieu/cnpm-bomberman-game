@@ -22,7 +22,7 @@ class FlamePropagationTest {
         try {
             Platform.startup(() -> {});
         } catch (IllegalStateException e) {
-            // Ignore if JavaFX already started
+            // Bỏ qua nếu JavaFX đã được khởi động trước đó
         }
     }
 
@@ -41,7 +41,7 @@ class FlamePropagationTest {
             e.printStackTrace();
         }
 
-        // Initialize grid to Grass to avoid NPE
+        // Khởi tạo bản đồ ô Cỏ để tránh lỗi NullPointerException
         for (int i = 0; i < variables.Variables.HEIGHT; i++) {
             for (int j = 0; j < variables.Variables.WIDTH; j++) {
                 gameMap.setTile(i, j, new Grass(j, i, Sprite.grass));
@@ -68,7 +68,7 @@ class FlamePropagationTest {
 
         bomb.update();
 
-        // 4 directions: Up (2, 1), Down (2, 3), Left (1, 2), Right (3, 2), Center (2, 2)
+        // 4 hướng: Lên (2, 1), Xuống (2, 3), Trái (1, 2), Phải (3, 2), Tâm (2, 2)
         boolean hasCenter = gameMap.getFlames().stream().anyMatch(f -> f.getTileX() == 2 && f.getTileY() == 2);
         boolean hasUp = gameMap.getFlames().stream().anyMatch(f -> f.getTileX() == 2 && f.getTileY() == 1);
         boolean hasDown = gameMap.getFlames().stream().anyMatch(f -> f.getTileX() == 2 && f.getTileY() == 3);
@@ -84,7 +84,7 @@ class FlamePropagationTest {
 
     @Test
     void testFlamePropagationBlockedByBrickNormal() {
-        // Brick at (2, 3) (Down direction)
+        // Gạch mềm tại ô lưới (2, 3) (Hướng xuống)
         Brick brick = new Brick(2, 3, Sprite.BRICK[0]);
         gameMap.setTile(3, 2, brick);
 
@@ -92,49 +92,49 @@ class FlamePropagationTest {
         bomb.isPierce = false;
         gameMap.getBombs().add(bomb);
         bomb.setTimetoExplode(0);
-        Flame.flameLength = 2; // Flame length = 2 to see if it propagates further
+        Flame.flameLength = 2; // Độ dài tia lửa = 2 để kiểm tra xem có lan xa hơn không
 
         bomb.update();
 
-        // Down direction is blocked, so no flame at (2, 4)
+        // Hướng xuống bị chặn, không có tia lửa tại ô lưới (2, 4)
         boolean hasFlameAt2_4 = gameMap.getFlames().stream().anyMatch(f -> f.getTileX() == 2 && f.getTileY() == 4);
         assertFalse(hasFlameAt2_4, "Tia lửa của bom thường không được đi xuyên qua Brick");
     }
 
     @Test
     void testFlamePropagationPierceBrick() {
-        // Brick at (2, 3) (Down direction)
+        // Gạch mềm tại ô lưới (2, 3) (Hướng xuống)
         Brick brick = new Brick(2, 3, Sprite.BRICK[0]);
         gameMap.setTile(3, 2, brick);
 
         Bomb bomb = new Bomb(2, 2, Sprite.BOMB[0]);
-        bomb.isPierce = true; // Pierce Bomb
+        bomb.isPierce = true; // Bom xuyên thấu (Pierce Bomb)
         gameMap.getBombs().add(bomb);
         bomb.setTimetoExplode(0);
-        Flame.flameLength = 2; // Flame length = 2
+        Flame.flameLength = 2; // Độ dài tia lửa = 2
 
         bomb.update();
 
-        // Down direction is pierced, so flame at (2, 4) IS spawned
+        // Hướng xuống có Gạch mềm nhưng bom xuyên thấu giúp tia lửa tại ô lưới (2, 4) VẪN được sinh ra
         boolean hasFlameAt2_4 = gameMap.getFlames().stream().anyMatch(f -> f.getTileX() == 2 && f.getTileY() == 4);
         assertTrue(hasFlameAt2_4, "Tia lửa của bom xuyên thấu phải đi xuyên qua Brick");
     }
 
     @Test
     void testFlamePropagationBlockedByWall() {
-        // Wall at (2, 3) (Down direction)
+        // Tường cứng tại ô lưới (2, 3) (Hướng xuống)
         Wall wall = new Wall(2, 3, Sprite.wall);
         gameMap.setTile(3, 2, wall);
 
         Bomb bomb = new Bomb(2, 2, Sprite.BOMB[0]);
-        bomb.isPierce = true; // Pierce Bomb
+        bomb.isPierce = true; // Bom xuyên thấu (Pierce Bomb)
         gameMap.getBombs().add(bomb);
         bomb.setTimetoExplode(0);
-        Flame.flameLength = 2; // Flame length = 2
+        Flame.flameLength = 2; // Độ dài tia lửa = 2
 
         bomb.update();
 
-        // Down direction has Wall, so even Pierce Bomb cannot pass Wall. No flame at (2, 4).
+        // Hướng xuống có Tường cứng, nên bom xuyên thấu cũng không thể đi qua. Không có tia lửa tại ô lưới (2, 4).
         boolean hasFlameAt2_4 = gameMap.getFlames().stream().anyMatch(f -> f.getTileX() == 2 && f.getTileY() == 4);
         assertFalse(hasFlameAt2_4, "Tia lửa của bom xuyên thấu cũng không được đi xuyên qua Wall (Tường cứng)");
     }

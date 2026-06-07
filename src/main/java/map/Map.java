@@ -92,7 +92,7 @@ public class Map {
         java.io.InputStream is = getClass().getResourceAsStream(resourcePath);
         if (is == null) {
             System.err.println("Không tìm thấy file Map tại: " + resourcePath);
-            return;
+            throw new FileNotFoundException("Không tìm thấy file Map tại: " + resourcePath);
         }
 
         Scanner scanner = new Scanner(is);

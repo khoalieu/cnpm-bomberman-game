@@ -19,7 +19,7 @@ class BombCountdownTest {
         try {
             Platform.startup(() -> {});
         } catch (IllegalStateException e) {
-            // Ignore if JavaFX already started
+            // Bỏ qua nếu JavaFX đã được khởi động trước đó
         }
     }
 
@@ -38,7 +38,7 @@ class BombCountdownTest {
             e.printStackTrace();
         }
 
-        // Initialize grid to Grass to avoid NPE
+        // Khởi tạo bản đồ ô Cỏ để tránh lỗi NullPointerException
         for (int i = 0; i < variables.Variables.HEIGHT; i++) {
             for (int j = 0; j < variables.Variables.WIDTH; j++) {
                 gameMap.setTile(i, j, new Grass(j, i, Sprite.grass));
@@ -62,17 +62,8 @@ class BombCountdownTest {
 
         bomb.update();
 
-        // Under normal circumstances, bomb.update() decrements timetoExplode if it's not 0
-        // Let's check:
-        // if (timetoExplode != 0) {
-        //     updateAnimation();
-        //     timetoExplode--;
-        // }
-        // So it should decrement to 119.
-        // Let's verify by retrieving the field using reflection or if it's public.
-        // Wait, in Bomb.java:
-        // protected int timetoExplode = 120;
-        // Since it's protected and we are in another package, we can use reflection to access it.
+        // Trong điều kiện bình thường, bomb.update() giảm timetoExplode nếu không phải là 0.
+        // Vì thuộc tính timetoExplode là protected và chúng ta đang ở package khác, ta sử dụng reflection để truy cập nó.
         try {
             java.lang.reflect.Field field = Bomb.class.getDeclaredField("timetoExplode");
             field.setAccessible(true);
@@ -89,18 +80,18 @@ class BombCountdownTest {
         gameMap.getBombs().add(bomb);
         bomb.setTimetoExplode(1);
 
-        // Frame 1: decrements from 1 to 0
+        // Frame 1: Giảm từ 1 về 0
         bomb.update();
 
-        // Frame 2: timetoExplode is 0, triggers explosion
+        // Frame 2: timetoExplode đã bằng 0, kích nổ quả bom
         bomb.update();
 
-        // Bomb is deleted from map
+        // Quả bom bị đánh dấu xóa khỏi bản đồ
         assertTrue(bomb.isRemoved(), "Quả bom phải bị đánh dấu loại bỏ (remove) sau khi nổ");
-        gameMap.updateMap(); // Clean up removed entities
+        gameMap.updateMap(); // Dọn dẹp thực thể bị xóa khỏi danh sách quản lý của bản đồ
         assertFalse(gameMap.getBombs().contains(bomb), "Quả bom phải biến mất khỏi danh sách bom hoạt động");
 
-        // Flame is spawned
+        // Tia lửa được tạo ra tại tâm vụ nổ
         assertFalse(gameMap.getFlames().isEmpty(), "Tia lửa (Flame) phải được tạo ra tại tâm vụ nổ");
         assertEquals(1, gameMap.getFlames().get(0).getTileX());
         assertEquals(1, gameMap.getFlames().get(0).getTileY());
