@@ -1,7 +1,6 @@
 package game;
 
 import input.KeyInput;
-import sound.Sound;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -13,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import map.Map;
+import sound.Sound;
 
 import java.io.FileNotFoundException;
 

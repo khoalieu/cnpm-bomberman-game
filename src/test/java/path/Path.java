@@ -1,7 +1,7 @@
 package path;
 
-import entity.animateentity.Bomb;
 import entity.Entity;
+import entity.animateentity.Bomb;
 import entity.staticentity.Wall;
 import map.Map;
 import entity.animateentity.character.Bomber;
